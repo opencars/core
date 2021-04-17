@@ -4,64 +4,52 @@ import (
 	"context"
 	"net"
 
+	"github.com/opencars/grpc/pkg/core"
 	"google.golang.org/grpc"
 
 	"github.com/opencars/core/pkg/domain"
-	"github.com/opencars/grpc/pkg/core"
 )
 
 // API represents gRPC API server.
 type API struct {
-	Addr string
+	addr string
 	s    *grpc.Server
 	svc  domain.CoreService
 }
 
 func New(addr string, svc domain.CoreService) *API {
+	opts := []grpc.ServerOption{
+		grpc.ChainUnaryInterceptor(
+			RequestLoggingInterceptor,
+		),
+	}
+
 	return &API{
-		Addr: addr,
+		addr: addr,
 		svc:  svc,
+		s:    grpc.NewServer(opts...),
 	}
 }
 
 func (a *API) Run(ctx context.Context) error {
-	errs := make(chan error)
+	listener, err := net.Listen("tcp", a.addr)
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+
+	core.RegisterVehicleServiceServer(a.s, &vehicleHandler{api: a})
+
+	errors := make(chan error)
 	go func() {
-		errs <- a.run()
+		errors <- a.s.Serve(listener)
 	}()
 
 	select {
 	case <-ctx.Done():
-		return a.close()
-	case err := <-errs:
-		return err
-	}
-}
-
-func (a *API) run() error {
-	listener, err := net.Listen("tcp", a.Addr)
-	if err != nil {
-		return err
-	}
-
-	opts := []grpc.ServerOption{
-		grpc.ChainUnaryInterceptor(
-			RequestLoggingInterceptor,
-			// ErrorInterceptor,
-		),
-	}
-
-	a.s = grpc.NewServer(opts...)
-	core.RegisterVehicleServiceServer(a.s, &vehicleHandler{api: a})
-
-	return a.s.Serve(listener)
-}
-
-// Close gracefully stops grpc API server.
-func (a *API) close() error {
-	if a.s != nil {
 		a.s.GracefulStop()
+		return <-errors
+	case err := <-errors:
+		return err
 	}
-
-	return nil
 }
