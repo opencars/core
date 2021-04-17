@@ -4,7 +4,7 @@ WORKDIR /go/src/app
 
 LABEL maintainer="ashanaakh@gmail.com"
 
-RUN apk add bash ca-certificates make
+RUN apk add bash ca-certificates git gcc g++ libc-dev curl make
 
 COPY go.mod go.sum ./
 
