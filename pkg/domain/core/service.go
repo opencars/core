@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/opencars/core/pkg/domain"
 	"github.com/opencars/grpc/pkg/operation"
+
+	"github.com/opencars/core/pkg/domain"
 )
 
 type Service struct {
