@@ -19,10 +19,10 @@ func (h *vehicleHandler) FindByNumber(ctx context.Context, r *core.NumberRequest
 	}
 
 	result := core.Result{
-		Vehicles: make(map[string]*core.Vehicle),
+		Vehicles: make([]*core.Vehicle, 0),
 	}
 
-	for k, v := range resp.Vehicles {
+	for _, v := range resp.Vehicles {
 		dto := core.Vehicle{
 			Vin: v.VIN,
 			FirstRegDate: &common.Date{
@@ -38,7 +38,7 @@ func (h *vehicleHandler) FindByNumber(ctx context.Context, r *core.NumberRequest
 		dto.Registrations = v.Registrations
 		dto.Operations = v.Operations
 
-		result.Vehicles[k] = &dto
+		result.Vehicles = append(result.Vehicles, &dto)
 	}
 
 	return &result, nil
@@ -51,10 +51,10 @@ func (h *vehicleHandler) FindByVIN(ctx context.Context, r *core.VINRequest) (*co
 	}
 
 	result := core.Result{
-		Vehicles: make(map[string]*core.Vehicle),
+		Vehicles: make([]*core.Vehicle, 0),
 	}
 
-	for k, v := range resp.Vehicles {
+	for _, v := range resp.Vehicles {
 		dto := core.Vehicle{
 			Vin: v.VIN,
 			FirstRegDate: &common.Date{
@@ -70,7 +70,7 @@ func (h *vehicleHandler) FindByVIN(ctx context.Context, r *core.VINRequest) (*co
 		dto.Registrations = v.Registrations
 		dto.Operations = v.Operations
 
-		result.Vehicles[k] = &dto
+		result.Vehicles = append(result.Vehicles, &dto)
 	}
 
 	return &result, nil
