@@ -5,6 +5,7 @@ import (
 
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
+	"github.com/opencars/grpc/pkg/vin_decoding"
 )
 
 type RegistrationProvider interface {
@@ -20,4 +21,8 @@ type OperationProvider interface {
 type CoreService interface {
 	FindByNumber(ctx context.Context, number string) (*Aggregate, error)
 	FindByVIN(ctx context.Context, vin string) (*Aggregate, error)
+}
+
+type VinDecoder interface {
+	Decode(context.Context, ...string) ([]*vin_decoding.DecodeResultItem, error)
 }

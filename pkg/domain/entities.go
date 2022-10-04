@@ -3,6 +3,7 @@ package domain
 import (
 	"time"
 
+	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
 )
@@ -67,7 +68,7 @@ type Operation struct {
 }
 
 type Vehicle struct {
-	VIN          string     `json:"vin"`
+	VIN          *core.Vin  `json:"vin"`
 	FirstRegDate *time.Time `json:"first_reg_date"`
 	Brand        string     `json:"brand"`
 	Model        string     `json:"model"`

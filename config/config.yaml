@@ -1,6 +1,6 @@
 log:
   level: "debug"
-  mode:  "dev"
+  mode: "dev"
 
 grpc:
   registrations:
@@ -10,3 +10,7 @@ grpc:
   operations:
     host: "0.0.0.0"
     port: 3002
+
+  vin_decoding:
+    host: "0.0.0.0"
+    port: 3003

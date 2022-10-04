@@ -4,20 +4,24 @@ import (
 	"context"
 	"time"
 
+	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
+	"github.com/opencars/operations/pkg/logger"
 
 	"github.com/opencars/core/pkg/domain"
 )
 
 type Service struct {
-	r domain.RegistrationProvider
-	o domain.OperationProvider
+	r  domain.RegistrationProvider
+	o  domain.OperationProvider
+	vd domain.VinDecoder
 }
 
-func NewService(r domain.RegistrationProvider, o domain.OperationProvider) (*Service, error) {
+func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd domain.VinDecoder) (*Service, error) {
 	return &Service{
-		r: r,
-		o: o,
+		r:  r,
+		o:  o,
+		vd: vd,
 	}, nil
 }
 
@@ -39,7 +43,9 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 	for _, r := range registrations {
 		if _, ok := result.Vehicles[r.Vin]; !ok {
 			v := domain.Vehicle{
-				VIN:   r.Vin,
+				VIN: &core.Vin{
+					Value: r.Vin,
+				},
 				Brand: r.Brand,
 				Model: r.Model,
 				Year:  r.Year,
@@ -71,6 +77,33 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 		}
 	}
 
+	vins := make([]string, 0, len(result.Vehicles))
+	for vin := range result.Vehicles {
+		vins = append(vins, vin)
+	}
+
+	decodedVins, err := s.vd.Decode(ctx, vins...)
+	if err != nil {
+		logger.Errorf("failed send decode command: %s", err)
+	} else {
+		for i, vinResult := range decodedVins {
+			if vinResult.Error != nil {
+				logger.Errorf("failed to parse vin code: %s", err)
+				continue
+			}
+
+			vin := vins[i]
+			vehicle, ok := result.Vehicles[vin]
+			if !ok {
+				logger.Errorf("failed to find : %s", err)
+				continue
+			}
+
+			vehicle.VIN.DecodedVin = vinResult.DecodedVin
+			vehicle.VIN.Vehicle = vinResult.Vehicle
+		}
+	}
+
 	return &result, nil
 }
 
@@ -87,7 +120,7 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 	for _, r := range registrations {
 		if _, ok := result.Vehicles[r.Vin]; !ok {
 			v := domain.Vehicle{
-				VIN:   r.Vin,
+				VIN:   &core.Vin{Value: r.Vin},
 				Brand: r.Brand,
 				Model: r.Model,
 				Year:  r.Year,

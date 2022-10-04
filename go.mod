@@ -3,17 +3,18 @@ module github.com/opencars/core
 go 1.19
 
 require (
-	github.com/opencars/grpc v0.2.0
-	github.com/rs/zerolog v1.20.0
-	google.golang.org/grpc v1.36.0
+	github.com/opencars/grpc v0.4.1
+	github.com/opencars/operations v0.0.32
+	github.com/rs/zerolog v1.26.0
+	google.golang.org/grpc v1.42.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
-	github.com/golang/protobuf v1.4.3 // indirect
-	golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
-	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a // indirect
-	golang.org/x/text v0.3.0 // indirect
+	github.com/golang/protobuf v1.5.0 // indirect
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
+	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
+	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 )

@@ -15,6 +15,7 @@ type Settings struct {
 type GRPC struct {
 	Registrations ServiceGRPC `yaml:"registrations"`
 	Operations    ServiceGRPC `yaml:"operations"`
+	VinDecoding   ServiceGRPC `yaml:"vin_decoding"`
 }
 
 type ServiceGRPC struct {

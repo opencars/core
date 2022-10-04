@@ -11,6 +11,7 @@ import (
 	"github.com/opencars/core/pkg/domain/core"
 	"github.com/opencars/core/pkg/domain/operation"
 	"github.com/opencars/core/pkg/domain/registration"
+	"github.com/opencars/core/pkg/domain/vin_decoding"
 
 	"github.com/opencars/core/pkg/config"
 	"github.com/opencars/core/pkg/logger"
@@ -39,7 +40,12 @@ func main() {
 		logger.Fatalf("operation service: %s", err)
 	}
 
-	svc, err := core.NewService(r, o)
+	vd, err := vin_decoding.NewService(conf.GRPC.VinDecoding.Address())
+	if err != nil {
+		logger.Fatalf("vin_decoding service: %s", err)
+	}
+
+	svc, err := core.NewService(r, o, vd)
 	if err != nil {
 		logger.Fatalf("core service: %s", err)
 	}
