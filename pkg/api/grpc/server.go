@@ -24,15 +24,18 @@ func (h *vehicleHandler) FindByNumber(ctx context.Context, r *core.NumberRequest
 
 	for _, v := range resp.Vehicles {
 		dto := core.Vehicle{
-			Vin: v.VIN,
-			FirstRegDate: &common.Date{
-				Year:  int32(v.FirstRegDate.Year()),
-				Month: int32(v.FirstRegDate.Month()),
-				Day:   int32(v.FirstRegDate.Day()),
-			},
+			Vin:   v.VIN,
 			Brand: v.Brand,
 			Model: v.Model,
 			Year:  v.Year,
+		}
+
+		if v.FirstRegDate != nil {
+			dto.FirstRegDate = &common.Date{
+				Year:  int32(v.FirstRegDate.Year()),
+				Month: int32(v.FirstRegDate.Month()),
+				Day:   int32(v.FirstRegDate.Day()),
+			}
 		}
 
 		dto.Registrations = v.Registrations

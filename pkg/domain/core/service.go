@@ -6,6 +6,7 @@ import (
 
 	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
+
 	"github.com/opencars/operations/pkg/logger"
 
 	"github.com/opencars/core/pkg/domain"
