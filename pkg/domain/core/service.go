@@ -77,6 +77,25 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 		}
 	}
 
+	if len(result.Vehicles) == 0 {
+		for _, op := range operations {
+			if _, ok := result.Vehicles[op.Vin]; !ok {
+				v := domain.Vehicle{
+					VIN: &core.Vin{
+						Value: op.Vin,
+					},
+					Brand: op.Brand,
+					Model: op.Model,
+					Year:  op.Year,
+				}
+
+				result.Vehicles[op.Vin] = &v
+			}
+
+			result.Vehicles[op.Vin].Operations = append(result.Vehicles[op.Vin].Operations, op)
+		}
+	}
+
 	vins := make([]string, 0, len(result.Vehicles))
 	for vin := range result.Vehicles {
 		vins = append(vins, vin)
