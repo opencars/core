@@ -3,7 +3,7 @@ module github.com/opencars/core
 go 1.19
 
 require (
-	github.com/opencars/grpc v0.4.1
+	github.com/opencars/grpc v0.4.5
 	github.com/opencars/operations v0.0.32
 	github.com/rs/zerolog v1.26.0
 	google.golang.org/grpc v1.42.0
