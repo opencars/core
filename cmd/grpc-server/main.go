@@ -14,7 +14,7 @@ import (
 	"github.com/opencars/core/pkg/domain/vin_decoding"
 
 	"github.com/opencars/core/pkg/config"
-	"github.com/opencars/core/pkg/logger"
+	"github.com/opencars/seedwork/logger"
 )
 
 func main() {

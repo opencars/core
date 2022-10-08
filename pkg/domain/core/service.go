@@ -6,8 +6,8 @@ import (
 
 	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
-
-	"github.com/opencars/operations/pkg/logger"
+	"github.com/opencars/grpc/pkg/registration"
+	"github.com/opencars/seedwork/logger"
 
 	"github.com/opencars/core/pkg/domain"
 )
@@ -27,81 +27,45 @@ func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd do
 }
 
 func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggregate, error) {
+	// Find all registratiton with given number.
 	registrations, err := s.r.FindByNumber(ctx, number)
 	if err != nil {
 		return nil, err
 	}
 
+	// Find all operations with given number.
 	operations, err := s.o.FindByNumber(ctx, number)
 	if err != nil {
 		return nil, err
 	}
 
-	result := domain.Aggregate{
-		Vehicles: make(map[string]*domain.Vehicle),
+	// Detect all unique vehicles from given operations and registrations.
+	vehicles, err := s.detectVehicles(ctx, operations, registrations)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, r := range registrations {
-		if _, ok := result.Vehicles[r.Vin]; !ok {
-			v := domain.Vehicle{
-				VIN: &core.Vin{
-					Value: r.Vin,
-				},
-				Brand: r.Brand,
-				Model: r.Model,
-				Year:  r.Year,
-			}
-
-			// Convert date of the first vehicle registration.
-			if r.FirstRegDate != nil {
-				firstRegDate := time.Date(
-					int(r.FirstRegDate.Year),
-					time.Month(r.FirstRegDate.Month),
-					int(r.FirstRegDate.Day),
-					0, 0, 0, 0,
-					time.UTC,
-				)
-				v.FirstRegDate = &firstRegDate
-			}
-
-			result.Vehicles[r.Vin] = &v
+	// For each unique vehicle we loop throught existing operations
+	// and try to find operations and registrations by vehicles vin.
+	for k, v := range vehicles.Vehicles {
+		// Find all operations/registrations with given vin-code.
+		registrations, err := s.r.FindByVIN(ctx, k)
+		if err != nil {
+			return nil, err
 		}
 
-		result.Vehicles[r.Vin].Registrations = append(result.Vehicles[r.Vin].Registrations, r)
-	}
-
-	for _, v := range result.Vehicles {
-		for _, o := range operations {
-			if o.Model == v.Model && o.Year == v.Year {
-				v.Operations = append(v.Operations, o)
-			}
+		operations, err := s.o.FindByVIN(ctx, k)
+		if err != nil {
+			return nil, err
 		}
+
+		v.Registrations = append(v.Registrations, registrations...)
+		v.Operations = append(v.Operations, operations...)
 	}
 
-	if len(result.Vehicles) == 0 {
-		for _, op := range operations {
-			if _, ok := result.Vehicles[op.Vin]; !ok {
-				v := domain.Vehicle{
-					VIN: &core.Vin{
-						Value: op.Vin,
-					},
-					Brand: op.Brand,
-					Model: op.Model,
-					Year:  op.Year,
-				}
+	vins := vehicles.VINs()
 
-				result.Vehicles[op.Vin] = &v
-			}
-
-			result.Vehicles[op.Vin].Operations = append(result.Vehicles[op.Vin].Operations, op)
-		}
-	}
-
-	vins := make([]string, 0, len(result.Vehicles))
-	for vin := range result.Vehicles {
-		vins = append(vins, vin)
-	}
-
+	// Decode each unique vin.
 	decodedVins, err := s.vd.Decode(ctx, vins...)
 	if err != nil {
 		logger.Errorf("failed send decode command: %s", err)
@@ -113,7 +77,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 			}
 
 			vin := vins[i]
-			vehicle, ok := result.Vehicles[vin]
+			vehicle, ok := vehicles.Vehicles[vin]
 			if !ok {
 				logger.Errorf("failed to find : %s", err)
 				continue
@@ -124,7 +88,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 		}
 	}
 
-	return &result, nil
+	return vehicles, nil
 }
 
 func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate, error) {
@@ -186,6 +150,56 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 		}
 
 		v.Operations = append(v.Operations, allOperations...)
+	}
+
+	return &result, nil
+}
+
+func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (*domain.Aggregate, error) {
+	result := domain.Aggregate{
+		Vehicles: make(map[string]*domain.Vehicle),
+	}
+
+	for _, r := range registrations {
+		if _, ok := result.Vehicles[r.Vin]; !ok {
+			v := domain.Vehicle{
+				VIN:   &core.Vin{Value: r.Vin},
+				Brand: r.Brand,
+				Model: r.Model,
+				Year:  r.Year,
+			}
+
+			// Convert date of the first vehicle registration.
+			if r.FirstRegDate != nil {
+				firstRegDate := time.Date(
+					int(r.FirstRegDate.Year),
+					time.Month(r.FirstRegDate.Month),
+					int(r.FirstRegDate.Day),
+					0, 0, 0, 0,
+					time.UTC,
+				)
+				v.FirstRegDate = &firstRegDate
+			}
+
+			result.Vehicles[r.Vin] = &v
+		}
+
+		result.Vehicles[r.Vin].Registrations = append(result.Vehicles[r.Vin].Registrations, r)
+	}
+
+	for _, op := range operations {
+		if _, ok := result.Vehicles[op.Vin]; !ok {
+			v := domain.Vehicle{
+				VIN:   &core.Vin{Value: op.Vin},
+				Brand: op.Brand,
+				Model: op.Model,
+				Year:  op.Year,
+			}
+
+			result.Vehicles[op.Vin] = &v
+		}
+
+		result.Vehicles[op.Vin].Operations = append(result.Vehicles[op.Vin].Operations, op)
 	}
 
 	return &result, nil

@@ -15,6 +15,7 @@ type RegistrationProvider interface {
 }
 
 type OperationProvider interface {
+	FindByVIN(ctx context.Context, vin string) ([]*operation.Record, error)
 	FindByNumber(ctx context.Context, number string) ([]*operation.Record, error)
 }
 

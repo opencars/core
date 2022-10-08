@@ -31,3 +31,12 @@ func (s *Service) FindByNumber(ctx context.Context, number string) ([]*operation
 
 	return resp.Operations, nil
 }
+
+func (s *Service) FindByVIN(ctx context.Context, vin string) ([]*operation.Record, error) {
+	resp, err := s.c.FindByVIN(ctx, &operation.VINRequest{Vin: vin})
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Operations, nil
+}

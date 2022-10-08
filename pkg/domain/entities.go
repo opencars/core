@@ -81,3 +81,12 @@ type Vehicle struct {
 type Aggregate struct {
 	Vehicles map[string]*Vehicle `json:"vehicles"`
 }
+
+func (aggr *Aggregate) VINs() []string {
+	vins := make([]string, 0, len(aggr.Vehicles))
+	for vin := range aggr.Vehicles {
+		vins = append(vins, vin)
+	}
+
+	return vins
+}
