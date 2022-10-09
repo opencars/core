@@ -27,11 +27,15 @@ func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd do
 }
 
 func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggregate, error) {
+	logger.Debugf("find all registratiton with given number")
+
 	// Find all registratiton with given number.
 	registrations, err := s.r.FindByNumber(ctx, number)
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Debugf("find all operations with given number")
 
 	// Find all operations with given number.
 	operations, err := s.o.FindByNumber(ctx, number)
@@ -39,20 +43,28 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 		return nil, err
 	}
 
+	logger.Debugf("detect all unique vehicles from given operations and registrations.")
+
 	// Detect all unique vehicles from given operations and registrations.
 	vehicles, err := s.detectVehicles(ctx, operations, registrations)
 	if err != nil {
 		return nil, err
 	}
 
+	logger.Debugf("collect operations and registrations for each vehicle vin.")
+
 	// For each unique vehicle we loop throught existing operations
 	// and try to find operations and registrations by vehicles vin.
 	for k, v := range vehicles.Vehicles {
 		// Find all operations/registrations with given vin-code.
+		logger.Debugf("vehicle %s, registrations", k)
+
 		registrations, err := s.r.FindByVIN(ctx, k)
 		if err != nil {
 			return nil, err
 		}
+
+		logger.Debugf("vehicle %s, operrations", k)
 
 		operations, err := s.o.FindByVIN(ctx, k)
 		if err != nil {
@@ -63,7 +75,11 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 		v.Operations = append(v.Operations, operations...)
 	}
 
+	logger.Debugf("map all vins")
+
 	vins := vehicles.VINs()
+
+	logger.Debugf("decode each unique vin")
 
 	// Decode each unique vin.
 	decodedVins, err := s.vd.Decode(ctx, vins...)
