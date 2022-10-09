@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/opencars/bot/pkg/logger"
+	"github.com/opencars/seedwork/logger"
+
 	"github.com/opencars/grpc/pkg/common"
 	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
