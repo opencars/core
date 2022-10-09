@@ -98,6 +98,10 @@ func (v *Vehicle) AppendOperations(candidates ...*operation.Record) {
 		s := fmt.Sprintf("%d-%s", candidate.Action.Code, date)
 		sha1 := sha1.Sum([]byte(s))
 
+		if v.OperationExist == nil {
+			v.OperationExist = make(map[[20]byte]struct{})
+		}
+
 		_, ok := v.OperationExist[sha1]
 		if ok {
 			logger.Debugf("candidate %s skipped")
@@ -116,6 +120,10 @@ func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
 		date := fmt.Sprintf("%d-%d-%d", candidate.Date.Day, candidate.Date.Month, candidate.Date.Year)
 		s := fmt.Sprintf("%d-%d-%s", candidate.Capacity, candidate.Year, date)
 		sha1 := sha1.Sum([]byte(s))
+
+		if v.RegistrationExist == nil {
+			v.RegistrationExist = make(map[[20]byte]struct{})
+		}
 
 		_, ok := v.RegistrationExist[sha1]
 		if ok {
