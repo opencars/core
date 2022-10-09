@@ -71,8 +71,8 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 			return nil, err
 		}
 
-		v.Registrations = append(v.Registrations, registrations...)
-		v.Operations = append(v.Operations, operations...)
+		v.AppendOperations(operations...)
+		v.AppendRegistrations(registrations...)
 	}
 
 	logger.Debugf("map all vins")
@@ -200,7 +200,7 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 			result.Vehicles[r.Vin] = &v
 		}
 
-		result.Vehicles[r.Vin].Registrations = append(result.Vehicles[r.Vin].Registrations, r)
+		result.Vehicles[r.Vin].AppendRegistrations(registrations...)
 	}
 
 	for _, op := range operations {
@@ -215,7 +215,7 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 			result.Vehicles[op.Vin] = &v
 		}
 
-		result.Vehicles[op.Vin].Operations = append(result.Vehicles[op.Vin].Operations, op)
+		result.Vehicles[op.Vin].AppendOperations(operations...)
 	}
 
 	return &result, nil

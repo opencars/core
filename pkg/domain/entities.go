@@ -1,8 +1,12 @@
 package domain
 
 import (
+	"crypto/sha1"
+	"fmt"
 	"time"
 
+	"github.com/opencars/bot/pkg/logger"
+	"github.com/opencars/grpc/pkg/common"
 	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
@@ -68,18 +72,63 @@ type Operation struct {
 }
 
 type Vehicle struct {
-	VIN          *core.Vin  `json:"vin"`
-	FirstRegDate *time.Time `json:"first_reg_date"`
-	Brand        string     `json:"brand"`
-	Model        string     `json:"model"`
-	Year         int32      `json:"year"`
+	VIN          *core.Vin
+	FirstRegDate *time.Time
+	Brand        string
+	Model        string
+	Year         int32
 
-	Registrations []*registration.Record `json:"registrations"`
-	Operations    []*operation.Record    `json:"operations"`
+	RegistrationExist map[[sha1.Size]byte]struct{}
+	OperationExist    map[[sha1.Size]byte]struct{}
+
+	Registrations []*registration.Record
+	Operations    []*operation.Record
+}
+
+type Hashable interface {
+	GetDate() *common.Date
+}
+
+// AppendOperations guarantees uniqness of the operations set.
+func (v *Vehicle) AppendOperations(candidates ...*operation.Record) {
+	for _, candidate := range candidates {
+		candidate.GetDate()
+		date := fmt.Sprintf("%d-%d-%d", candidate.Date.Day, candidate.Date.Month, candidate.Date.Year)
+		s := fmt.Sprintf("%d-%s", candidate.Action.Code, date)
+		sha1 := sha1.Sum([]byte(s))
+
+		_, ok := v.OperationExist[sha1]
+		if ok {
+			logger.Debugf("candidate %s skipped")
+			continue
+		}
+
+		v.OperationExist[sha1] = struct{}{}
+		v.Operations = append(v.Operations, candidate)
+	}
+}
+
+// AppendRegistrations guarantees uniqness of the operations set.
+func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
+	for _, candidate := range candidates {
+		candidate.GetDate()
+		date := fmt.Sprintf("%d-%d-%d", candidate.Date.Day, candidate.Date.Month, candidate.Date.Year)
+		s := fmt.Sprintf("%d-%d-%s", candidate.Capacity, candidate.Year, date)
+		sha1 := sha1.Sum([]byte(s))
+
+		_, ok := v.RegistrationExist[sha1]
+		if ok {
+			logger.Debugf("candidate %s skipped")
+			continue
+		}
+
+		v.RegistrationExist[sha1] = struct{}{}
+		v.Registrations = append(v.Registrations, candidate)
+	}
 }
 
 type Aggregate struct {
-	Vehicles map[string]*Vehicle `json:"vehicles"`
+	Vehicles map[string]*Vehicle
 }
 
 func (aggr *Aggregate) VINs() []string {
