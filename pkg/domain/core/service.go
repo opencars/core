@@ -97,15 +97,12 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 				continue
 			}
 
-			vin := vins[i]
-			vehicle, ok := vehicles.Vehicles[vin]
-			if !ok {
-				logger.Errorf("failed to find : %s", err)
-				continue
+			for _, v := range vehicles.Vehicles {
+				if v.VIN.GetValue() == vins[i] {
+					v.VIN.DecodedVin = vinResult.DecodedVin
+					v.VIN.Vehicle = vinResult.Vehicle
+				}
 			}
-
-			vehicle.VIN.DecodedVin = vinResult.DecodedVin
-			vehicle.VIN.Vehicle = vinResult.Vehicle
 		}
 	}
 
