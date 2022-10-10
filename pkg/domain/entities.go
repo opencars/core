@@ -8,7 +8,6 @@ import (
 
 	"github.com/opencars/seedwork/logger"
 
-	"github.com/opencars/grpc/pkg/common"
 	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
@@ -87,6 +86,10 @@ type Vehicle struct {
 	Operations    []*operation.Record
 }
 
+func (v *Vehicle) HasVIN() bool {
+	return v.VIN != nil && v.VIN.Value != ""
+}
+
 func NewVehicle(vin, brand, model string, year int32) Vehicle {
 	return Vehicle{
 		VIN:   &core.Vin{Value: vin},
@@ -106,14 +109,9 @@ func (v *Vehicle) SetFirstRegDate(x time.Time) {
 	v.FirstRegDate = &x
 }
 
-type Hashable interface {
-	GetDate() *common.Date
-}
-
 // AppendOperations guarantees uniqness of the operations set.
 func (v *Vehicle) AppendOperations(candidates ...*operation.Record) {
 	for _, candidate := range candidates {
-		candidate.GetDate()
 		date := fmt.Sprintf("%d-%d-%d", candidate.Date.Day, candidate.Date.Month, candidate.Date.Year)
 		s := fmt.Sprintf("%d-%s", candidate.Action.Code, date)
 		sha1 := sha1.Sum([]byte(s))
@@ -131,6 +129,11 @@ func (v *Vehicle) AppendOperations(candidates ...*operation.Record) {
 
 		v.OperationExist[sha1] = struct{}{}
 		v.Operations = append(v.Operations, candidate)
+
+		// Try to assign vin code if it is not already assinged.
+		if candidate.Vin != "" && !v.HasVIN() {
+			candidate.Vin = v.VIN.Value
+		}
 	}
 }
 
@@ -150,6 +153,11 @@ func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
 
 		v.RegistrationExist[sha1] = struct{}{}
 		v.Registrations = append(v.Registrations, candidate)
+
+		// Try to assign vin code if it is not already assinged.
+		if candidate.Vin != "" && !v.HasVIN() {
+			candidate.Vin = v.VIN.Value
+		}
 	}
 }
 
@@ -159,9 +167,23 @@ type Aggregate struct {
 
 func (aggr *Aggregate) VINs() []string {
 	vins := make([]string, 0, len(aggr.Vehicles))
-	for vin := range aggr.Vehicles {
-		vins = append(vins, vin)
+	for _, v := range aggr.Vehicles {
+		vins = append(vins, v.VIN.Value)
 	}
 
 	return vins
+}
+
+type Hashable interface {
+	GetBrand() string
+	GetModel() string
+	GetYear() int32
+	GetCapacity() int32
+}
+
+func Hash(x Hashable) string {
+	key := fmt.Sprintf("%s-%s-%d-%d", x.GetBrand(), x.GetModel(), x.GetYear(), x.GetCapacity())
+	sha1 := sha1.Sum([]byte(key))
+
+	return base64.URLEncoding.EncodeToString(sha1[:])
 }

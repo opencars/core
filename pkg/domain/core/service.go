@@ -56,17 +56,22 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 	// For each unique vehicle we loop throught existing operations
 	// and try to find operations and registrations by vehicles vin.
 	for k, v := range vehicles.Vehicles {
-		// Find all operations/registrations with given vin-code.
-		logger.Debugf("vehicle %s, registrations", k)
+		if !v.HasVIN() {
+			logger.Debugf("vehicle %s does not have vin-code", k)
+			continue
+		}
 
-		registrations, err := s.r.FindByVIN(ctx, k)
+		// Find all operations/registrations with given vin-code.
+		logger.Debugf("vehicle %s, registrations", v.VIN.GetValue())
+
+		registrations, err := s.r.FindByVIN(ctx, v.VIN.GetValue())
 		if err != nil {
 			return nil, err
 		}
 
-		logger.Debugf("vehicle %s, operations", k)
+		logger.Debugf("vehicle %s, operations", v.VIN.GetValue())
 
-		operations, err := s.o.FindByVIN(ctx, k)
+		operations, err := s.o.FindByVIN(ctx, v.VIN.GetValue())
 		if err != nil {
 			return nil, err
 		}
@@ -181,7 +186,9 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 	for _, r := range registrations {
 		logger.Debugf("detectVehicles: registration: %#v", r.String())
 
-		if _, ok := result.Vehicles[r.Vin]; !ok {
+		hash := domain.Hash(r)
+
+		if _, ok := result.Vehicles[hash]; !ok {
 			v := domain.NewVehicle(r.Vin, r.Brand, r.Model, r.Year)
 
 			// Convert date of the first vehicle registration.
@@ -197,21 +204,23 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 				v.SetFirstRegDate(firstRegDate)
 			}
 
-			result.Vehicles[r.Vin] = &v
+			result.Vehicles[hash] = &v
 		}
 
-		result.Vehicles[r.Vin].AppendRegistrations(r)
+		result.Vehicles[hash].AppendRegistrations(r)
 	}
 
 	for _, op := range operations {
-		logger.Debugf("detectVehicles: registration: %#v", op.String())
+		logger.Debugf("detectVehicles: operation: %#v", op.String())
 
-		if _, ok := result.Vehicles[op.Vin]; !ok {
-			v := domain.NewVehicle(op.Vin, op.Brand, op.Model, op.Year)
-			result.Vehicles[op.Vin] = &v
+		hash := domain.Hash(op)
+
+		if _, ok := result.Vehicles[hash]; !ok {
+			v := domain.NewVehicle(hash, op.Brand, op.Model, op.Year)
+			result.Vehicles[hash] = &v
 		}
 
-		result.Vehicles[op.Vin].AppendOperations(op)
+		result.Vehicles[hash].AppendOperations(op)
 	}
 
 	return &result, nil
