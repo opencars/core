@@ -174,14 +174,13 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (*domain.Aggregate, error) {
 	logger.Debugf("detectVehicles")
 
-	logger.Debugf("detectVehicles: operations: %#v", operations)
-	logger.Debugf("detectVehicles: registrations: %#v", registrations)
-
 	result := domain.Aggregate{
 		Vehicles: make(map[string]*domain.Vehicle),
 	}
 
 	for _, r := range registrations {
+		logger.Debugf("detectVehicles: registration: %#v", r.String())
+
 		if _, ok := result.Vehicles[r.Vin]; !ok {
 			v := domain.Vehicle{
 				VIN:   &core.Vin{Value: r.Vin},
@@ -209,6 +208,8 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 	}
 
 	for _, op := range operations {
+		logger.Debugf("detectVehicles: registration: %#v", op.String())
+
 		if _, ok := result.Vehicles[op.Vin]; !ok {
 			v := domain.Vehicle{
 				VIN:   &core.Vin{Value: op.Vin},
