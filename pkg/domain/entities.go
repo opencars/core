@@ -104,7 +104,7 @@ func (v *Vehicle) AppendOperations(candidates ...*operation.Record) {
 
 		_, ok := v.OperationExist[sha1]
 		if ok {
-			logger.Debugf("candidate %s skipped")
+			logger.Debugf("candidate %s skipped", sha1)
 			continue
 		}
 
@@ -127,7 +127,7 @@ func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
 
 		_, ok := v.RegistrationExist[sha1]
 		if ok {
-			logger.Debugf("candidate %s skipped")
+			logger.Debugf("candidate %s skipped", sha1)
 			continue
 		}
 

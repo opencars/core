@@ -64,7 +64,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 			return nil, err
 		}
 
-		logger.Debugf("vehicle %s, operrations", k)
+		logger.Debugf("vehicle %s, operations", k)
 
 		operations, err := s.o.FindByVIN(ctx, k)
 		if err != nil {
@@ -172,6 +172,11 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 }
 
 func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (*domain.Aggregate, error) {
+	logger.Debugf("detectVehicles")
+
+	logger.Debugf("detectVehicles: operations: %#v", operations)
+	logger.Debugf("detectVehicles: registrations: %#v", registrations)
+
 	result := domain.Aggregate{
 		Vehicles: make(map[string]*domain.Vehicle),
 	}
