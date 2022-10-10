@@ -182,12 +182,7 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 		logger.Debugf("detectVehicles: registration: %#v", r.String())
 
 		if _, ok := result.Vehicles[r.Vin]; !ok {
-			v := domain.Vehicle{
-				VIN:   &core.Vin{Value: r.Vin},
-				Brand: r.Brand,
-				Model: r.Model,
-				Year:  r.Year,
-			}
+			v := domain.NewVehicle(r.Vin, r.Brand, r.Model, r.Year)
 
 			// Convert date of the first vehicle registration.
 			if r.FirstRegDate != nil {
@@ -198,30 +193,25 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 					0, 0, 0, 0,
 					time.UTC,
 				)
-				v.FirstRegDate = &firstRegDate
+
+				v.SetFirstRegDate(firstRegDate)
 			}
 
 			result.Vehicles[r.Vin] = &v
 		}
 
-		result.Vehicles[r.Vin].AppendRegistrations(registrations...)
+		result.Vehicles[r.Vin].AppendRegistrations(r)
 	}
 
 	for _, op := range operations {
 		logger.Debugf("detectVehicles: registration: %#v", op.String())
 
 		if _, ok := result.Vehicles[op.Vin]; !ok {
-			v := domain.Vehicle{
-				VIN:   &core.Vin{Value: op.Vin},
-				Brand: op.Brand,
-				Model: op.Model,
-				Year:  op.Year,
-			}
-
+			v := domain.NewVehicle(op.Vin, op.Brand, op.Model, op.Year)
 			result.Vehicles[op.Vin] = &v
 		}
 
-		result.Vehicles[op.Vin].AppendOperations(operations...)
+		result.Vehicles[op.Vin].AppendOperations(op)
 	}
 
 	return &result, nil

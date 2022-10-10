@@ -87,6 +87,25 @@ type Vehicle struct {
 	Operations    []*operation.Record
 }
 
+func NewVehicle(vin, brand, model string, year int32) Vehicle {
+	return Vehicle{
+		VIN:   &core.Vin{Value: vin},
+		Brand: brand,
+		Model: model,
+		Year:  year,
+
+		RegistrationExist: make(map[[sha1.Size]byte]struct{}),
+		OperationExist:    make(map[[sha1.Size]byte]struct{}),
+
+		Registrations: make([]*registration.Record, 0),
+		Operations:    make([]*operation.Record, 0),
+	}
+}
+
+func (v *Vehicle) SetFirstRegDate(x time.Time) {
+	v.FirstRegDate = &x
+}
+
 type Hashable interface {
 	GetDate() *common.Date
 }
@@ -118,15 +137,10 @@ func (v *Vehicle) AppendOperations(candidates ...*operation.Record) {
 // AppendRegistrations guarantees uniqness of the operations set.
 func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
 	for _, candidate := range candidates {
-		candidate.GetDate()
 		date := fmt.Sprintf("%d-%d-%d", candidate.Date.Day, candidate.Date.Month, candidate.Date.Year)
 		s := fmt.Sprintf("%d-%d-%s", candidate.Capacity, candidate.Year, date)
 		sha1 := sha1.Sum([]byte(s))
 		hex := base64.URLEncoding.EncodeToString(sha1[:])
-
-		if v.RegistrationExist == nil {
-			v.RegistrationExist = make(map[[20]byte]struct{})
-		}
 
 		_, ok := v.RegistrationExist[sha1]
 		if ok {
