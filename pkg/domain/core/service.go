@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
 	"github.com/opencars/seedwork/logger"
@@ -110,67 +109,57 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 }
 
 func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate, error) {
+	logger.Debugf("find all registratiton with given vin")
+
+	// Find all registratiton with given vin.
 	registrations, err := s.r.FindByVIN(ctx, vin)
 	if err != nil {
 		return nil, err
 	}
 
-	result := domain.Aggregate{
-		Vehicles: make(map[string]*domain.Vehicle),
+	logger.Debugf("find all operations with given vin")
+
+	// Find all operations with given vin.
+	operations, err := s.o.FindByVIN(ctx, vin)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, r := range registrations {
-		if _, ok := result.Vehicles[r.Vin]; !ok {
-			v := domain.Vehicle{
-				VIN:   &core.Vin{Value: r.Vin},
-				Brand: r.Brand,
-				Model: r.Model,
-				Year:  r.Year,
-			}
+	logger.Debugf("detect all unique vehicles from given operations and registrations.")
 
-			// Convert date of the first vehicle registration.
-			if r.FirstRegDate != nil {
-				firstRegDate := time.Date(
-					int(r.FirstRegDate.Year),
-					time.Month(r.FirstRegDate.Month),
-					int(r.FirstRegDate.Day),
-					0, 0, 0, 0,
-					time.UTC,
-				)
-				v.FirstRegDate = &firstRegDate
-			}
-
-			result.Vehicles[r.Vin] = &v
-		}
-
-		result.Vehicles[r.Vin].Registrations = append(result.Vehicles[r.Vin].Registrations, r)
+	// Detect all unique vehicles from given operations and registrations.
+	vehicles, err := s.detectVehicles(ctx, operations, registrations)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, v := range result.Vehicles {
-		numbers := make(map[string]struct{})
+	logger.Debugf("map all vins")
 
-		for _, r := range registrations {
-			numbers[r.Number] = struct{}{}
-		}
+	vins := vehicles.VINs()
 
-		allOperations := make([]*operation.Record, 0)
-		for number := range numbers {
-			operations, err := s.o.FindByNumber(ctx, number)
-			if err != nil {
-				return nil, err
+	logger.Debugf("decode each unique vin")
+
+	// Decode each unique vin.
+	decodedVins, err := s.vd.Decode(ctx, vins...)
+	if err != nil {
+		logger.Errorf("failed send decode command: %s", err)
+	} else {
+		for i, vinResult := range decodedVins {
+			if vinResult.Error != nil {
+				logger.Errorf("failed to parse vin code: %s", err)
+				continue
 			}
 
-			for _, o := range operations {
-				if v.Brand == o.Brand && v.Year == o.Year {
-					allOperations = append(allOperations, o)
+			for _, v := range vehicles.Vehicles {
+				if v.VIN.GetValue() == vins[i] {
+					v.VIN.DecodedVin = vinResult.DecodedVin
+					v.VIN.Vehicle = vinResult.Vehicle
 				}
 			}
 		}
-
-		v.Operations = append(v.Operations, allOperations...)
 	}
 
-	return &result, nil
+	return vehicles, nil
 }
 
 func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (*domain.Aggregate, error) {
