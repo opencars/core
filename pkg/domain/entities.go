@@ -91,8 +91,13 @@ func (v *Vehicle) HasVIN() bool {
 }
 
 func NewVehicle(vin, brand, model string, year int32) Vehicle {
+	var vinCode *core.Vin
+	if vin != "" {
+		vinCode = &core.Vin{Value: vin}
+	}
+
 	return Vehicle{
-		VIN:   &core.Vin{Value: vin},
+		VIN:   vinCode,
 		Brand: brand,
 		Model: model,
 		Year:  year,

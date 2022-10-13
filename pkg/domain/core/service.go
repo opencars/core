@@ -202,7 +202,7 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 		hash := domain.Hash(op)
 
 		if _, ok := result.Vehicles[hash]; !ok {
-			v := domain.NewVehicle(hash, op.Brand, op.Model, op.Year)
+			v := domain.NewVehicle(op.Vin, op.Brand, op.Model, op.Year)
 			result.Vehicles[hash] = &v
 		}
 
