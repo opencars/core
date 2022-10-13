@@ -92,7 +92,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 	} else {
 		for i, vinResult := range decodedVins {
 			if vinResult.Error != nil {
-				logger.Errorf("failed to parse vin code: %s", vinResult.Error)
+				logger.Errorf("failed to parse vin-code %s: %s", vins[i], vinResult.Error)
 				continue
 			}
 
