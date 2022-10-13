@@ -173,7 +173,11 @@ type Aggregate struct {
 func (aggr *Aggregate) VINs() []string {
 	vins := make([]string, 0, len(aggr.Vehicles))
 	for _, v := range aggr.Vehicles {
-		vins = append(vins, v.VIN.Value)
+		if v.VIN.GetValue() == "" {
+			continue
+		}
+
+		vins = append(vins, v.VIN.GetValue())
 	}
 
 	return vins
