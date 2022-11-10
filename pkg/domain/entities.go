@@ -4,10 +4,12 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/opencars/seedwork/logger"
 
+	"github.com/opencars/grpc/pkg/common"
 	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
@@ -84,6 +86,54 @@ type Vehicle struct {
 
 	Registrations []*registration.Record
 	Operations    []*operation.Record
+}
+
+func (v *Vehicle) LastRegistration() *registration.Record {
+	if len(v.Registrations) == 0 {
+		return nil
+	}
+
+	last := v.Registrations[0]
+
+	for i := 1; i < len(v.Registrations); i++ {
+
+		if dateAfterThan(v.Registrations[i].Date, last.Date) {
+			last = v.Registrations[i]
+		}
+	}
+
+	return last
+}
+
+func (v *Vehicle) LastOperation() *operation.Record {
+	if len(v.Operations) == 0 {
+		return nil
+	}
+
+	last := v.Operations[0]
+
+	for i := 1; i < len(v.Operations); i++ {
+
+		if dateAfterThan(v.Operations[i].Date, last.Date) {
+			last = v.Operations[i]
+		}
+	}
+
+	return last
+}
+
+func (v *Vehicle) LastModificationAt() time.Time {
+	o := v.LastOperation()
+	r := v.LastRegistration()
+
+	ot := time.Date(int(o.Date.Year), time.Month(o.Date.Month), int(o.Date.Day), 0, 0, 0, 0, time.UTC)
+	rt := time.Date(int(r.Date.Year), time.Month(r.Date.Month), int(r.Date.Day), 0, 0, 0, 0, time.UTC)
+
+	if ot.After(rt) {
+		return ot
+	}
+
+	return rt
 }
 
 func (v *Vehicle) HasVIN() bool {
@@ -167,12 +217,33 @@ func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
 }
 
 type Aggregate struct {
-	Vehicles map[string]*Vehicle
+	Vehicles []Vehicle
 }
 
-func (aggr *Aggregate) VINs() []string {
-	vins := make([]string, 0, len(aggr.Vehicles))
-	for _, v := range aggr.Vehicles {
+func NewAggregate(vehicles map[string]*Vehicle) *Aggregate {
+	sorted := make([]Vehicle, 0, len(vehicles))
+
+	// Copy.
+	for _, v := range vehicles {
+		sorted = append(sorted, *v)
+	}
+
+	// Sort vehicles by last modification in operations or registrations.
+	sort.Slice(sorted, func(i, j int) bool {
+		x := sorted[i].LastModificationAt()
+		y := sorted[j].LastModificationAt()
+
+		return y.After(x)
+	})
+
+	return &Aggregate{
+		Vehicles: sorted,
+	}
+}
+
+func GetVINs(vehicles map[string]*Vehicle) []string {
+	vins := make([]string, 0, len(vehicles))
+	for _, v := range vehicles {
 		if v.VIN.GetValue() == "" {
 			continue
 		}
@@ -195,4 +266,15 @@ func Hash(x Hashable) string {
 	sha1 := sha1.Sum([]byte(key))
 
 	return base64.URLEncoding.EncodeToString(sha1[:])
+}
+
+func dateAfterThan(x *common.Date, y *common.Date) bool {
+	if x == nil || y == nil {
+		return false
+	}
+
+	xt := time.Date(int(x.Year), time.Month(x.Month), int(x.Day), 0, 0, 0, 0, time.UTC)
+	yt := time.Date(int(y.Year), time.Month(y.Month), int(y.Day), 0, 0, 0, 0, time.UTC)
+
+	return xt.After(yt)
 }

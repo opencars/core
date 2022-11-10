@@ -54,7 +54,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 
 	// For each unique vehicle we loop throught existing operations
 	// and try to find operations and registrations by vehicles vin.
-	for k, v := range vehicles.Vehicles {
+	for k, v := range vehicles {
 		if !v.HasVIN() {
 			logger.Debugf("vehicle %s does not have vin-code", k)
 			continue
@@ -81,7 +81,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 
 	logger.Debugf("map all vins")
 
-	vins := vehicles.VINs()
+	vins := domain.GetVINs(vehicles)
 
 	logger.Debugf("decode each unique vin")
 
@@ -96,7 +96,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 				continue
 			}
 
-			for _, v := range vehicles.Vehicles {
+			for _, v := range vehicles {
 				if v.VIN.GetValue() == vins[i] {
 					v.VIN.DecodedVin = vinResult.DecodedVin
 					v.VIN.Vehicle = vinResult.Vehicle
@@ -105,7 +105,11 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 		}
 	}
 
-	return vehicles, nil
+	// Sort vehicles by last modification in operations or registrations.
+	// toSort := make([]model.Vehicle, 0, len(vehicles))
+	// for _, v := range
+
+	return domain.NewAggregate(vehicles), nil
 }
 
 func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate, error) {
@@ -135,7 +139,7 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 
 	logger.Debugf("map all vins")
 
-	vins := vehicles.VINs()
+	vins := domain.GetVINs(vehicles)
 
 	logger.Debugf("decode each unique vin")
 
@@ -150,7 +154,7 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 				continue
 			}
 
-			for _, v := range vehicles.Vehicles {
+			for _, v := range vehicles {
 				if v.VIN.GetValue() == vins[i] {
 					v.VIN.DecodedVin = vinResult.DecodedVin
 					v.VIN.Vehicle = vinResult.Vehicle
@@ -159,22 +163,16 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 		}
 	}
 
-	return vehicles, nil
+	return domain.NewAggregate(vehicles), nil
 }
 
-func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (*domain.Aggregate, error) {
-	logger.Debugf("detectVehicles")
-
-	result := domain.Aggregate{
-		Vehicles: make(map[string]*domain.Vehicle),
-	}
+func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (map[string]*domain.Vehicle, error) {
+	vehicles := make(map[string]*domain.Vehicle)
 
 	for _, r := range registrations {
-		logger.Debugf("detectVehicles: registration: %#v", r.String())
-
 		hash := domain.Hash(r)
 
-		if _, ok := result.Vehicles[hash]; !ok {
+		if _, ok := vehicles[hash]; !ok {
 			v := domain.NewVehicle(r.Vin, r.Brand, r.Model, r.Year)
 
 			// Convert date of the first vehicle registration.
@@ -190,24 +188,23 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 				v.SetFirstRegDate(firstRegDate)
 			}
 
-			result.Vehicles[hash] = &v
+			vehicles[hash] = &v
 		}
 
-		result.Vehicles[hash].AppendRegistrations(r)
+		vehicles[hash].AppendRegistrations(r)
 	}
 
 	for _, op := range operations {
 		logger.Debugf("detectVehicles: operation: %#v", op.String())
-
 		hash := domain.Hash(op)
 
-		if _, ok := result.Vehicles[hash]; !ok {
+		if _, ok := vehicles[hash]; !ok {
 			v := domain.NewVehicle(op.Vin, op.Brand, op.Model, op.Year)
-			result.Vehicles[hash] = &v
+			vehicles[hash] = &v
 		}
 
-		result.Vehicles[hash].AppendOperations(op)
+		vehicles[hash].AppendOperations(op)
 	}
 
-	return &result, nil
+	return vehicles, nil
 }
