@@ -241,7 +241,7 @@ func NewAggregate(vehicles map[string]*Vehicle) *Aggregate {
 		x := sorted[i].LastModificationAt()
 		y := sorted[j].LastModificationAt()
 
-		return y.After(x)
+		return x.After(y)
 	})
 
 	return &Aggregate{
