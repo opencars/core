@@ -105,11 +105,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 		}
 	}
 
-	// Sort vehicles by last modification in operations or registrations.
-	// toSort := make([]model.Vehicle, 0, len(vehicles))
-	// for _, v := range
-
-	return domain.NewAggregate(vehicles), nil
+	return domain.NewAggregateWithNumber(number, vehicles), nil
 }
 
 func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate, error) {

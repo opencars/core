@@ -88,16 +88,15 @@ type Vehicle struct {
 	Operations    []*operation.Record
 }
 
-func (v *Vehicle) LastRegistration() *registration.Record {
+func (v *Vehicle) LastRegistrationWithNumber(number string) *registration.Record {
 	if len(v.Registrations) == 0 {
 		return nil
 	}
 
-	last := v.Registrations[0]
+	var last *registration.Record
 
-	for i := 1; i < len(v.Registrations); i++ {
-
-		if dateAfterThan(v.Registrations[i].Date, last.Date) {
+	for i := 0; i < len(v.Registrations); i++ {
+		if number == v.Registrations[i].Number && dateAfterThan(v.Registrations[i].Date, last.Date) {
 			last = v.Registrations[i]
 		}
 	}
@@ -105,16 +104,15 @@ func (v *Vehicle) LastRegistration() *registration.Record {
 	return last
 }
 
-func (v *Vehicle) LastOperation() *operation.Record {
+func (v *Vehicle) LastOperationWithNumber(number string) *operation.Record {
 	if len(v.Operations) == 0 {
 		return nil
 	}
 
-	last := v.Operations[0]
+	var last *operation.Record
 
-	for i := 1; i < len(v.Operations); i++ {
-
-		if dateAfterThan(v.Operations[i].Date, last.Date) {
+	for i := 0; i < len(v.Operations); i++ {
+		if number == v.Operations[i].Number && dateAfterThan(v.Operations[i].Date, last.Date) {
 			last = v.Operations[i]
 		}
 	}
@@ -122,9 +120,9 @@ func (v *Vehicle) LastOperation() *operation.Record {
 	return last
 }
 
-func (v *Vehicle) LastModificationAt() time.Time {
-	o := v.LastOperation()
-	r := v.LastRegistration()
+func (v *Vehicle) LastModificationWithNumber(number string) time.Time {
+	o := v.LastOperationWithNumber(number)
+	r := v.LastRegistrationWithNumber(number)
 
 	var ot time.Time
 	var rt time.Time
@@ -228,7 +226,7 @@ type Aggregate struct {
 	Vehicles []Vehicle
 }
 
-func NewAggregate(vehicles map[string]*Vehicle) *Aggregate {
+func NewAggregateWithNumber(number string, vehicles map[string]*Vehicle) *Aggregate {
 	sorted := make([]Vehicle, 0, len(vehicles))
 
 	// Copy.
@@ -238,14 +236,27 @@ func NewAggregate(vehicles map[string]*Vehicle) *Aggregate {
 
 	// Sort vehicles by last modification in operations or registrations.
 	sort.Slice(sorted, func(i, j int) bool {
-		x := sorted[i].LastModificationAt()
-		y := sorted[j].LastModificationAt()
+		x := sorted[i].LastModificationWithNumber(number)
+		y := sorted[j].LastModificationWithNumber(number)
 
 		return x.After(y)
 	})
 
 	return &Aggregate{
 		Vehicles: sorted,
+	}
+}
+
+func NewAggregate(vehicles map[string]*Vehicle) *Aggregate {
+	items := make([]Vehicle, 0, len(vehicles))
+
+	// Copy.
+	for _, v := range vehicles {
+		items = append(items, *v)
+	}
+
+	return &Aggregate{
+		Vehicles: items,
 	}
 }
 
