@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/opencars/seedwork/logger"
+	"github.com/opencars/translit"
 
 	"github.com/opencars/grpc/pkg/common"
 	"github.com/opencars/grpc/pkg/core"
@@ -97,7 +98,7 @@ func (v *Vehicle) LastRegistrationWithNumber(number string) *registration.Record
 	maxTime := &common.Date{}
 
 	for i := 0; i < len(v.Registrations); i++ {
-		if number != v.Registrations[i].Number {
+		if translit.ToLatin(number) != translit.ToLatin(v.Operations[i].Number) {
 			continue
 		}
 
@@ -119,7 +120,7 @@ func (v *Vehicle) LastOperationWithNumber(number string) *operation.Record {
 	maxTime := &common.Date{}
 
 	for i := 0; i < len(v.Operations); i++ {
-		if number != v.Operations[i].Number {
+		if translit.ToLatin(number) != translit.ToLatin(v.Operations[i].Number) {
 			continue
 		}
 
