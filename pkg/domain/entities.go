@@ -94,10 +94,16 @@ func (v *Vehicle) LastRegistrationWithNumber(number string) *registration.Record
 	}
 
 	var last *registration.Record
+	maxTime := &common.Date{}
 
 	for i := 0; i < len(v.Registrations); i++ {
-		if number == v.Registrations[i].Number && dateAfterThan(v.Registrations[i].Date, last.Date) {
+		if number != v.Registrations[i].Number {
+			continue
+		}
+
+		if dateAfterThan(v.Registrations[i].Date, maxTime) {
 			last = v.Registrations[i]
+			maxTime = last.Date
 		}
 	}
 
@@ -110,10 +116,16 @@ func (v *Vehicle) LastOperationWithNumber(number string) *operation.Record {
 	}
 
 	var last *operation.Record
+	maxTime := &common.Date{}
 
 	for i := 0; i < len(v.Operations); i++ {
-		if number == v.Operations[i].Number && dateAfterThan(v.Operations[i].Date, last.Date) {
+		if number != v.Operations[i].Number {
+			continue
+		}
+
+		if dateAfterThan(v.Operations[i].Date, maxTime) {
 			last = v.Operations[i]
+			maxTime = last.Date
 		}
 	}
 
