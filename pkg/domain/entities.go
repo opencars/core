@@ -129,11 +129,11 @@ func (v *Vehicle) LastModificationAt() time.Time {
 	var ot time.Time
 	var rt time.Time
 
-	if o.Date != nil {
+	if o != nil && o.Date != nil {
 		ot = time.Date(int(o.Date.Year), time.Month(o.Date.Month), int(o.Date.Day), 0, 0, 0, 0, time.UTC)
 	}
 
-	if r.Date != nil {
+	if r != nil && r.Date != nil {
 		rt = time.Date(int(r.Date.Year), time.Month(r.Date.Month), int(r.Date.Day), 0, 0, 0, 0, time.UTC)
 	}
 
