@@ -1,6 +1,10 @@
 package model
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/opencars/grpc/pkg/core"
+)
 
 type Aggregate struct {
 	Vehicles []Vehicle
@@ -37,5 +41,16 @@ func NewAggregate(vehicles map[string]*Vehicle) *Aggregate {
 
 	return &Aggregate{
 		Vehicles: items,
+	}
+}
+
+func (a *Aggregate) ToGRPC() *core.Result {
+	vehicles := make([]*core.Vehicle, 0, len(a.Vehicles))
+	for _, v := range a.Vehicles {
+		vehicles = append(vehicles, v.ToGRPC())
+	}
+
+	return &core.Result{
+		Vehicles: vehicles,
 	}
 }

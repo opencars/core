@@ -1,9 +1,10 @@
 package grpc
 
 import (
-	"github.com/opencars/core/pkg/domain/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/opencars/core/pkg/domain/model"
 )
 
 var (
