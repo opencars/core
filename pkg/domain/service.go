@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 
+	"github.com/opencars/core/pkg/domain/model"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
 	"github.com/opencars/grpc/pkg/vin_decoding"
@@ -20,8 +21,8 @@ type OperationProvider interface {
 }
 
 type CoreService interface {
-	FindByNumber(ctx context.Context, number string) (*Aggregate, error)
-	FindByVIN(ctx context.Context, vin string) (*Aggregate, error)
+	FindByNumber(ctx context.Context, number string) (*model.Aggregate, error)
+	FindByVIN(ctx context.Context, vin string) (*model.Aggregate, error)
 }
 
 type VinDecoder interface {

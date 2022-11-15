@@ -1,10 +1,9 @@
-package domain
+package model
 
 import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/opencars/seedwork/logger"
@@ -87,6 +86,7 @@ type Vehicle struct {
 
 	Registrations []*registration.Record
 	Operations    []*operation.Record
+	// Changes       []Change
 }
 
 func (v *Vehicle) LastRegistrationWithNumber(number string) *registration.Record {
@@ -232,44 +232,6 @@ func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
 		if candidate.Vin != "" && !v.HasVIN() {
 			candidate.Vin = v.VIN.Value
 		}
-	}
-}
-
-type Aggregate struct {
-	Vehicles []Vehicle
-}
-
-func NewAggregateWithNumber(number string, vehicles map[string]*Vehicle) *Aggregate {
-	sorted := make([]Vehicle, 0, len(vehicles))
-
-	// Copy.
-	for _, v := range vehicles {
-		sorted = append(sorted, *v)
-	}
-
-	// Sort vehicles by last modification in operations or registrations.
-	sort.Slice(sorted, func(i, j int) bool {
-		x := sorted[i].LastModificationWithNumber(number)
-		y := sorted[j].LastModificationWithNumber(number)
-
-		return x.After(y)
-	})
-
-	return &Aggregate{
-		Vehicles: sorted,
-	}
-}
-
-func NewAggregate(vehicles map[string]*Vehicle) *Aggregate {
-	items := make([]Vehicle, 0, len(vehicles))
-
-	// Copy.
-	for _, v := range vehicles {
-		items = append(items, *v)
-	}
-
-	return &Aggregate{
-		Vehicles: items,
 	}
 }
 

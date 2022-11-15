@@ -9,6 +9,7 @@ import (
 	"github.com/opencars/seedwork/logger"
 
 	"github.com/opencars/core/pkg/domain"
+	"github.com/opencars/core/pkg/domain/model"
 )
 
 type Service struct {
@@ -25,7 +26,7 @@ func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd do
 	}, nil
 }
 
-func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggregate, error) {
+func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggregate, error) {
 	logger.Debugf("find all registratiton with given number")
 
 	// Find all registratiton with given number.
@@ -81,7 +82,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 
 	logger.Debugf("map all vins")
 
-	vins := domain.GetVINs(vehicles)
+	vins := model.GetVINs(vehicles)
 
 	logger.Debugf("decode each unique vin")
 
@@ -105,10 +106,10 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*domain.Aggr
 		}
 	}
 
-	return domain.NewAggregateWithNumber(number, vehicles), nil
+	return model.NewAggregateWithNumber(number, vehicles), nil
 }
 
-func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate, error) {
+func (s *Service) FindByVIN(ctx context.Context, vin string) (*model.Aggregate, error) {
 	logger.Debugf("find all registratiton with given vin")
 
 	// Find all registratiton with given vin.
@@ -135,7 +136,7 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 
 	logger.Debugf("map all vins")
 
-	vins := domain.GetVINs(vehicles)
+	vins := model.GetVINs(vehicles)
 
 	logger.Debugf("decode each unique vin")
 
@@ -159,17 +160,17 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*domain.Aggregate,
 		}
 	}
 
-	return domain.NewAggregate(vehicles), nil
+	return model.NewAggregate(vehicles), nil
 }
 
-func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (map[string]*domain.Vehicle, error) {
-	vehicles := make(map[string]*domain.Vehicle)
+func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (map[string]*model.Vehicle, error) {
+	vehicles := make(map[string]*model.Vehicle)
 
 	for _, r := range registrations {
-		hash := domain.Hash(r)
+		hash := model.Hash(r)
 
 		if _, ok := vehicles[hash]; !ok {
-			v := domain.NewVehicle(r.Vin, r.Brand, r.Model, r.Year)
+			v := model.NewVehicle(r.Vin, r.Brand, r.Model, r.Year)
 
 			// Convert date of the first vehicle registration.
 			if r.FirstRegDate != nil {
@@ -192,10 +193,10 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 
 	for _, op := range operations {
 		logger.Debugf("detectVehicles: operation: %#v", op.String())
-		hash := domain.Hash(op)
+		hash := model.Hash(op)
 
 		if _, ok := vehicles[hash]; !ok {
-			v := domain.NewVehicle(op.Vin, op.Brand, op.Model, op.Year)
+			v := model.NewVehicle(op.Vin, op.Brand, op.Model, op.Year)
 			vehicles[hash] = &v
 		}
 
