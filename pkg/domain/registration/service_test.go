@@ -1,1 +1,0 @@
-package registration_test
