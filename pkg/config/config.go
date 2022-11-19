@@ -16,6 +16,7 @@ type GRPC struct {
 	Registrations ServiceGRPC `yaml:"registrations"`
 	Operations    ServiceGRPC `yaml:"operations"`
 	VinDecoding   ServiceGRPC `yaml:"vin_decoding"`
+	ALPR          ServiceGRPC `yaml:"alpr"`
 }
 
 type ServiceGRPC struct {

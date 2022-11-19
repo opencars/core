@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/opencars/core/pkg/domain/model"
+	"github.com/opencars/grpc/pkg/alpr"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
 	"github.com/opencars/grpc/pkg/vin_decoding"
@@ -27,4 +28,8 @@ type CoreService interface {
 
 type VinDecoder interface {
 	Decode(context.Context, ...string) ([]*vin_decoding.DecodeResultItem, error)
+}
+
+type VehicleImageProvider interface {
+	FindByNumber(context.Context, *alpr.NumberRequest) ([]*alpr.Recognition, error)
 }

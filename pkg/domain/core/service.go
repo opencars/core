@@ -16,13 +16,15 @@ type Service struct {
 	r  domain.RegistrationProvider
 	o  domain.OperationProvider
 	vd domain.VinDecoder
+	vi domain.VehicleImageProvider
 }
 
-func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd domain.VinDecoder) (*Service, error) {
+func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd domain.VinDecoder, vi domain.VehicleImageProvider) (*Service, error) {
 	return &Service{
 		r:  r,
 		o:  o,
 		vd: vd,
+		vi: vi,
 	}, nil
 }
 

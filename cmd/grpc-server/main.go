@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/opencars/core/pkg/api/grpc"
+	"github.com/opencars/core/pkg/domain/alpr"
 	"github.com/opencars/core/pkg/domain/core"
 	"github.com/opencars/core/pkg/domain/operation"
 	"github.com/opencars/core/pkg/domain/registration"
@@ -32,20 +33,25 @@ func main() {
 
 	r, err := registration.NewService(conf.GRPC.Registrations.Address())
 	if err != nil {
-		logger.Fatalf("registration service: %s", err)
+		logger.Fatalf("grpc: registration service: %s", err)
 	}
 
 	o, err := operation.NewService(conf.GRPC.Operations.Address())
 	if err != nil {
-		logger.Fatalf("operation service: %s", err)
+		logger.Fatalf("grpc: operation service: %s", err)
 	}
 
 	vd, err := vin_decoding.NewService(conf.GRPC.VinDecoding.Address())
 	if err != nil {
-		logger.Fatalf("vin_decoding service: %s", err)
+		logger.Fatalf("grpc: vin_decoding service: %s", err)
 	}
 
-	svc, err := core.NewService(r, o, vd)
+	vi, err := alpr.NewService(conf.GRPC.ALPR.Address())
+	if err != nil {
+		logger.Fatalf("grpc: alpr service: %s", err)
+	}
+
+	svc, err := core.NewService(r, o, vd, vi)
 	if err != nil {
 		logger.Fatalf("core service: %s", err)
 	}
