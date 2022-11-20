@@ -24,8 +24,9 @@ type Vehicle struct {
 	registrationExist map[[sha1.Size]byte]struct{}
 	operationExist    map[[sha1.Size]byte]struct{}
 
-	registrations []*registration.Record
-	operations    []*operation.Record
+	registrations  []*registration.Record
+	operations     []*operation.Record
+	advertisements []Advertisement
 }
 
 func NewVehicle(vin, brand, model string, year int32) Vehicle {
@@ -172,6 +173,10 @@ func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
 			candidate.Vin = v.VIN.Value
 		}
 	}
+}
+
+func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
+	v.advertisements = append(v.advertisements, candidates...)
 }
 
 func (v *Vehicle) GetOperations() []*operation.Record {

@@ -16,6 +16,7 @@ type Service struct {
 	r  domain.RegistrationProvider
 	o  domain.OperationProvider
 	vd domain.VinDecoder
+	as domain.AdvertisementService
 }
 
 func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd domain.VinDecoder) (*Service, error) {
@@ -85,6 +86,23 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 	vins := model.GetVINs(vehicles)
 
 	logger.Debugf("decode each unique vin")
+
+	// Search information about vehicle adds.
+	advertisements, err := s.as.FindByVINs(ctx, vins...)
+	if err != nil {
+		logger.Errorf("failed to get adds: %s", err)
+	} else {
+		for _, add := range advertisements {
+			for _, v := range vehicles {
+				if add.VinPage != v.VIN.Value && add.VinOpencars != v.VIN.Value {
+					logger.Errorf("unexpected vin: %s", add.VinPage)
+					continue
+				}
+
+				v.AppendAdvertisements(add)
+			}
+		}
+	}
 
 	// Decode each unique vin.
 	decodedVins, err := s.vd.Decode(ctx, vins...)

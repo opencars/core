@@ -28,3 +28,7 @@ type CoreService interface {
 type VinDecoder interface {
 	Decode(context.Context, ...string) ([]*vin_decoding.DecodeResultItem, error)
 }
+
+type AdvertisementService interface {
+	FindByVINs(context.Context, ...string) ([]model.Advertisement, error)
+}

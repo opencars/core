@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"strconv"
 
 	"gopkg.in/yaml.v2"
 )
@@ -10,24 +9,9 @@ import (
 type Settings struct {
 	Log  Log  `yaml:"log"`
 	GRPC GRPC `yaml:"grpc"`
+	HTTP HTTP `yaml:"http"`
 }
 
-type GRPC struct {
-	Registrations ServiceGRPC `yaml:"registrations"`
-	Operations    ServiceGRPC `yaml:"operations"`
-	VinDecoding   ServiceGRPC `yaml:"vin_decoding"`
-}
-
-type ServiceGRPC struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
-}
-
-func (s *ServiceGRPC) Address() string {
-	return s.Host + ":" + strconv.Itoa(s.Port)
-}
-
-// Log represents settings for application logger.
 type Log struct {
 	Level string `yaml:"level"`
 	Mode  string `yaml:"mode"`
