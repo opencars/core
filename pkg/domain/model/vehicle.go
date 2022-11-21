@@ -183,10 +183,6 @@ func (v *Vehicle) GetOperations() []*operation.Record {
 	return v.operations
 }
 
-func (v *Vehicle) GetRegistrations() []*registration.Record {
-	return v.registrations
-}
-
 func (v *Vehicle) ToGRPC() *core.Vehicle {
 	dto := core.Vehicle{
 		Vin:   v.VIN,
@@ -205,6 +201,7 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 
 	dto.Registrations = v.registrations
 	dto.Operations = v.operations
+	dto.Advertisements = v.GetAdvertisements()
 
 	return &dto
 }
