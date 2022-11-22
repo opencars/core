@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/opencars/core/pkg/config"
 	"github.com/opencars/core/pkg/domain/model"
@@ -25,7 +27,14 @@ func NewService(cfg *config.ServiceHTTP) (*Service, error) {
 		secret: cfg.Secret,
 		token:  cfg.Token,
 
-		c: &http.Client{},
+		c: &http.Client{
+			Timeout: time.Second,
+			Transport: &http.Transport{
+				Dial: func(network, addr string) (net.Conn, error) {
+					return net.DialTimeout(network, addr, time.Second)
+				},
+			},
+		},
 	}, nil
 }
 

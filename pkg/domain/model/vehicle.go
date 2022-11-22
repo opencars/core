@@ -201,7 +201,11 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 
 	dto.Registrations = v.registrations
 	dto.Operations = v.operations
-	dto.Advertisements = v.GetAdvertisements()
+	dto.Advertisements = make([]*core.Advertisement, 0)
+
+	for _, add := range v.advertisements {
+		dto.Advertisements = append(dto.Advertisements, add.toGRPC())
+	}
 
 	return &dto
 }
