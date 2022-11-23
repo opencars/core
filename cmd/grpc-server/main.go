@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/opencars/core/pkg/api/grpc"
+	"github.com/opencars/core/pkg/domain/adverts"
 	"github.com/opencars/core/pkg/domain/core"
 	"github.com/opencars/core/pkg/domain/operation"
 	"github.com/opencars/core/pkg/domain/registration"
@@ -45,7 +46,12 @@ func main() {
 		logger.Fatalf("vin_decoding service: %s", err)
 	}
 
-	svc, err := core.NewService(r, o, vd)
+	as, err := adverts.NewService(&conf.HTTP.Statisfy)
+	if err != nil {
+		logger.Fatalf("statisfy service: %s", err)
+	}
+
+	svc, err := core.NewService(r, o, vd, as)
 	if err != nil {
 		logger.Fatalf("core service: %s", err)
 	}

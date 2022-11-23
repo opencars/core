@@ -19,11 +19,12 @@ type Service struct {
 	as domain.AdvertisementService
 }
 
-func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd domain.VinDecoder) (*Service, error) {
+func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd domain.VinDecoder, as domain.AdvertisementService) (*Service, error) {
 	return &Service{
 		r:  r,
 		o:  o,
 		vd: vd,
+		as: as,
 	}, nil
 }
 
