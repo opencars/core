@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"time"
@@ -71,13 +72,17 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 		return nil, fmt.Errorf("failed, status: %s", resp.Status)
 	}
 
-	var result []model.Advertisement
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	res, err := io.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
 
-	logger.Infof("add: %d", result)
+	// var result []model.Advertisement
+	// if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	// 	return nil, err
+	// }
 
-	return result, nil
+	logger.Infof("res: %s", string(res))
+
+	return make([]model.Advertisement, 0), nil
 }
