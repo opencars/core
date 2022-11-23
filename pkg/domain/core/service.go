@@ -160,6 +160,24 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*model.Aggregate, 
 
 	logger.Debugf("decode each unique vin")
 
+	// Search information about vehicle adds.
+	advertisements, err := s.as.FindByVINs(ctx, vins, []string{})
+	if err != nil {
+		logger.Errorf("failed to get adds: %s", err)
+	} else {
+		for _, add := range advertisements {
+			logger.Errorf("addv: %+v", add)
+			for _, v := range vehicles {
+				if add.VinPage != v.VIN.Value && add.VinOpencars != v.VIN.Value {
+					logger.Errorf("unexpected vin: %s", add.VinPage)
+					continue
+				}
+
+				v.AppendAdvertisements(add)
+			}
+		}
+	}
+
 	// Decode each unique vin.
 	decodedVins, err := s.vd.Decode(ctx, vins...)
 	if err != nil {
