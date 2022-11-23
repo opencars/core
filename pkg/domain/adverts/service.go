@@ -49,7 +49,7 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 		return nil, err
 	}
 
-	logger.Infof("request: %d", jsonBody)
+	logger.Infof("request: %s", string(jsonBody))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.addr+"/api/v1/data/adverts", bytes.NewReader(jsonBody))
 	if err != nil {
@@ -65,13 +65,14 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 	}
 	defer resp.Body.Close()
 
-	logger.Infof("status: %d", resp.Status)
+	logger.Infof("status: %s", resp.Status)
 
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("failed, status: %s", resp.Status)
 	}
 
 	var result []model.Advertisement
+
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
