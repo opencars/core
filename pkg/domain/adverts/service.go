@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/opencars/seedwork/logger"
+
 	"github.com/opencars/core/pkg/config"
 	"github.com/opencars/core/pkg/domain/model"
 )
@@ -47,6 +49,8 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 		return nil, err
 	}
 
+	logger.Infof("request: %d", jsonBody)
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.addr+"/api/v1/data/adverts", bytes.NewReader(jsonBody))
 	if err != nil {
 		return nil, err
@@ -61,6 +65,8 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 	}
 	defer resp.Body.Close()
 
+	logger.Infof("status: %d", resp.Status)
+
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("failed, status: %s", resp.Status)
 	}
@@ -69,6 +75,8 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
+
+	logger.Infof("add: %d", result)
 
 	return result, nil
 }
