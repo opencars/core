@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -46,7 +47,7 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.addr, bytes.NewReader(jsonBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.addr+"/api/v1/data/adverts", bytes.NewReader(jsonBody))
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +62,7 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, nil
+		return nil, fmt.Errorf("failed, status: %s", resp.Status)
 	}
 
 	var result []model.Advertisement
