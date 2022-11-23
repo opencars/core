@@ -96,7 +96,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 		for _, add := range advertisements {
 			for _, v := range vehicles {
 				if add.VinPage != v.VIN.Value && add.VinOpencars != v.VIN.Value {
-					logger.Errorf("unexpected vin: %s", add.VinPage)
+					logger.Errorf("x vin: %s", add.VinPage)
 					continue
 				}
 

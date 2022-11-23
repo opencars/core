@@ -205,7 +205,10 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 
 	for _, add := range v.advertisements {
 		dto.Advertisements = append(dto.Advertisements, add.toGRPC())
+		logger.Infof("add: %+v", add.toGRPC())
 	}
+
+	logger.Infof("adds: %+v", dto.Advertisements)
 
 	return &dto
 }
