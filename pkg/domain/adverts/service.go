@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"time"
@@ -42,8 +41,8 @@ func NewService(cfg *config.ServiceHTTP) (*Service, error) {
 	}, nil
 }
 
-func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Advertisement, error) {
-	body := newRequestBody(vins...)
+func (s *Service) FindByVINs(ctx context.Context, vins, numbers []string) ([]model.Advertisement, error) {
+	body := newRequestBody(vins, numbers)
 
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
@@ -72,17 +71,10 @@ func (s *Service) FindByVINs(ctx context.Context, vins ...string) ([]model.Adver
 		return nil, fmt.Errorf("failed, status: %s", resp.Status)
 	}
 
-	res, err := io.ReadAll(resp.Body)
-	if err != nil {
+	var result []model.Advertisement
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
 
-	// var result []model.Advertisement
-	// if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-	// 	return nil, err
-	// }
-
-	logger.Infof("res: %s", string(res))
-
-	return make([]model.Advertisement, 0), nil
+	return result, nil
 }

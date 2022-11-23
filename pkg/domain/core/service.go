@@ -89,7 +89,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 	logger.Debugf("decode each unique vin")
 
 	// Search information about vehicle adds.
-	advertisements, err := s.as.FindByVINs(ctx, vins...)
+	advertisements, err := s.as.FindByVINs(ctx, vins, []string{})
 	if err != nil {
 		logger.Errorf("failed to get adds: %s", err)
 	} else {

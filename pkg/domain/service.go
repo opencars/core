@@ -30,5 +30,5 @@ type VinDecoder interface {
 }
 
 type AdvertisementService interface {
-	FindByVINs(context.Context, ...string) ([]model.Advertisement, error)
+	FindByVINs(context.Context, []string, []string) ([]model.Advertisement, error)
 }
