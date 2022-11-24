@@ -137,7 +137,7 @@ const (
 	BodyTypeSedan       BodyType = "Sedan / saloon"
 	BodyTypeCrossover   BodyType = "Crossover"
 	BodyTypeMinivan     BodyType = "Minivan"
-	BodyTypeHatchbak    BodyType = "Hatchbak"
+	BodyTypeHatchback   BodyType = "Hatchback"
 	BodyTypeWagon       BodyType = "Station wagon / estate / universal"
 	BodyTypeCoupe       BodyType = "Coupe"
 	BodyTypeConvertible BodyType = "Convertible / cabriolet"
@@ -147,32 +147,32 @@ const (
 	BodyTypeOther       BodyType = "Other"
 )
 
-func (b BodyType) grpc() string {
+func (b BodyType) grpc() core.Advertisement_BodyType {
 	switch b {
 	case BodyTypeSedan:
-		return string(BodyTypeSedan)
+		return core.Advertisement_BODY_SEDAN
 	case BodyTypeCrossover:
-		return string(BodyTypeCrossover)
+		return core.Advertisement_BODY_CROSSOVER
 	case BodyTypeMinivan:
-		return string(BodyTypeMinivan)
-	case BodyTypeHatchbak:
-		return string(BodyTypeHatchbak)
+		return core.Advertisement_BODY_MINIVAN
+	case BodyTypeHatchback:
+		return core.Advertisement_BODY_HATCHBACK
 	case BodyTypeWagon:
-		return string(BodyTypeWagon)
+		return core.Advertisement_BODY_WAGON
 	case BodyTypeCoupe:
-		return string(BodyTypeCoupe)
+		return core.Advertisement_BODY_COUPE
 	case BodyTypeConvertible:
-		return string(BodyTypeConvertible)
+		return core.Advertisement_BODY_CONVERTIBLE
 	case BodyTypePickup:
-		return string(BodyTypePickup)
+		return core.Advertisement_BODY_PICKUP
 	case BodyTypeLimousine:
-		return string(BodyTypeLimousine)
+		return core.Advertisement_BODY_LIMOUSINE
 	case BodyTypeLightTruck:
-		return string(BodyTypeLightTruck)
+		return core.Advertisement_BODY_LIGHTTRUCK
 	case BodyTypeOther:
-		return string(BodyTypeOther)
+		return core.Advertisement_BODY_OTHER
 	default:
-		return "Unknown"
+		return core.Advertisement_BODY_UNKNOWN
 	}
 }
 
