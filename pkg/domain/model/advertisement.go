@@ -1,6 +1,9 @@
 package model
 
-import "github.com/opencars/grpc/pkg/core"
+import (
+	"github.com/opencars/grpc/pkg/core"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
 
 type Gearbox string
 
@@ -214,30 +217,37 @@ func (a *Advertisement) toGRPC() *core.Advertisement {
 	}
 
 	return &core.Advertisement{
-		Id:                     uint32(a.ID),
-		Resource:               a.ResourceID,
-		Brand:                  a.BrandID,
-		Model:                  a.ModelID,
-		Category:               a.Category.grpc(),
-		Title:                  a.Title,
-		IsVerified:             a.IsVerified,
-		Url:                    a.URL,
-		Price:                  uint32(a.Price),
-		ImageUrls:              a.ImageUrls,
-		LastSeenAt:             uint32(a.LastSeenAt),
-		PublishedAt:            uint32(a.PublishedAt),
-		ScrapedAt:              uint32(a.ScrapedAt),
-		UpdatedAt:              uint32(a.UpdatedAt),
-		Year:                   uint32(a.Year),
-		Gearbox:                a.Gearbox.grpc(),
-		WheelDrive:             a.WheelDrive.grpc(),
-		EngineCapacity:         a.EngineCapacity,
-		Fuel:                   a.Fuel.grpc(),
-		Mileage:                uint32(a.Mileage),
-		Body:                   a.Body.grpc(),
-		IsCustomsCleared:       a.IsCustomsCleared,
-		Vin:                    vin,
-		RegistrationNumberPage: a.RegistrationNumberPage,
-		IdOnResource:           uint32(a.IDOnResource),
+		Id:         uint32(a.ID),
+		Resource:   a.ResourceID,
+		Brand:      a.BrandID,
+		Model:      a.ModelID,
+		Category:   a.Category.grpc(),
+		Title:      a.Title,
+		IsVerified: a.IsVerified,
+		Url:        a.URL,
+		Price:      uint32(a.Price),
+		ImageUrls:  a.ImageUrls,
+		LastSeenAt: &timestamppb.Timestamp{
+			Seconds: int64(a.LastSeenAt),
+		},
+		PublishedAt: &timestamppb.Timestamp{
+			Seconds: int64(a.PublishedAt),
+		},
+		ScrapedAt: &timestamppb.Timestamp{
+			Seconds: int64(a.ScrapedAt),
+		},
+		UpdatedAt: &timestamppb.Timestamp{
+			Seconds: int64(a.UpdatedAt),
+		},
+		Year:             uint32(a.Year),
+		Gearbox:          a.Gearbox.grpc(),
+		WheelDrive:       a.WheelDrive.grpc(),
+		EngineCapacity:   a.EngineCapacity,
+		Fuel:             a.Fuel.grpc(),
+		Mileage:          uint32(a.Mileage),
+		Body:             a.Body.grpc(),
+		IsCustomsCleared: a.IsCustomsCleared,
+		Vin:              vin,
+		Number:           a.RegistrationNumberPage,
 	}
 }
