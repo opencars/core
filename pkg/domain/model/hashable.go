@@ -4,6 +4,9 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"math"
+
+	"github.com/opencars/seedwork/logger"
 )
 
 type Hashable interface {
@@ -14,7 +17,11 @@ type Hashable interface {
 }
 
 func Hash(x Hashable) string {
-	key := fmt.Sprintf("%s-%s-%d-%d", x.GetBrand(), x.GetModel(), x.GetYear(), x.GetCapacity())
+	capacity := float64(x.GetCapacity()) / 100
+	roundedCapacity := math.Round(capacity)
+
+	key := fmt.Sprintf("%s-%s-%d-%f", x.GetBrand(), x.GetModel(), x.GetYear(), roundedCapacity)
+	logger.Infof("key to be hashed: %s", key)
 	sha1 := sha1.Sum([]byte(key))
 
 	return base64.URLEncoding.EncodeToString(sha1[:])

@@ -89,20 +89,19 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 	logger.Debugf("decode each unique vin")
 
 	// Search information about vehicle adds.
-	advertisements, err := s.as.FindByVINs(ctx, vins, []string{})
+	advertisements, err := s.as.FindByVINs(ctx, vins, []string{number})
 	if err != nil {
 		logger.Errorf("failed to get adds: %s", err)
 	} else {
-		for _, add := range advertisements {
-			logger.Errorf("addv: %+v", add)
-			for _, v := range vehicles {
-				if add.VinPage != v.VIN.Value && add.VinOpencars != v.VIN.Value {
-					logger.Errorf("unexpected vin: %s", add.VinPage)
-					continue
-				}
+		for i, add := range advertisements {
+			hash := model.Hash(&advertisements[i])
 
-				v.AppendAdvertisements(add)
+			if _, ok := vehicles[hash]; !ok {
+				logger.Infof("advertisement with id %s is not attached to vehicle", add.ID)
+				continue
 			}
+
+			vehicles[hash].AppendAdvertisements(add)
 		}
 	}
 

@@ -1,6 +1,8 @@
 package model
 
 import (
+	"strings"
+
 	"github.com/opencars/grpc/pkg/core"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -182,8 +184,8 @@ func (b BodyType) grpc() core.Advertisement_BodyType {
 type Advertisement struct {
 	ID                     int32          `json:"id"`
 	ResourceID             string         `json:"resource_id"`
-	BrandID                string         `json:"brand_id"`
-	ModelID                string         `json:"model_id"`
+	Brand                  string         `json:"brand_id"`
+	Model                  string         `json:"model_id"`
 	Category               Category       `json:"category"`
 	Title                  string         `json:"title"`
 	IsVerified             bool           `json:"is_verified"`
@@ -194,7 +196,7 @@ type Advertisement struct {
 	PublishedAt            int            `json:"published_at"`
 	ScrapedAt              int            `json:"scraped_at"`
 	UpdatedAt              int            `json:"updated_at"`
-	Year                   int            `json:"year"`
+	Year                   int32          `json:"year"`
 	Gearbox                Gearbox        `json:"gearbox_type"`
 	WheelDrive             WheelDriveType `json:"wheel_drive_type"`
 	EngineCapacity         float64        `json:"engine_capacity"`
@@ -219,8 +221,8 @@ func (a *Advertisement) toGRPC() *core.Advertisement {
 	return &core.Advertisement{
 		Id:         uint32(a.ID),
 		Resource:   a.ResourceID,
-		Brand:      a.BrandID,
-		Model:      a.ModelID,
+		Brand:      a.Brand,
+		Model:      a.Model,
 		Category:   a.Category.grpc(),
 		Title:      a.Title,
 		IsVerified: a.IsVerified,
@@ -250,4 +252,18 @@ func (a *Advertisement) toGRPC() *core.Advertisement {
 		Vin:              vin,
 		Number:           a.RegistrationNumberPage,
 	}
+}
+
+func (a *Advertisement) GetBrand() string {
+	return strings.ToUpper(a.Brand)
+}
+func (a *Advertisement) GetModel() string {
+	return strings.ToUpper(a.Model)
+}
+func (a *Advertisement) GetYear() int32 {
+	return a.Year
+}
+
+func (a *Advertisement) GetCapacity() int32 {
+	return int32(a.EngineCapacity * float64(1000))
 }
