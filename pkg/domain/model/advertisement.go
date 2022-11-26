@@ -221,8 +221,8 @@ func (a *Advertisement) toGRPC() *core.Advertisement {
 	return &core.Advertisement{
 		Id:         uint32(a.ID),
 		Resource:   a.ResourceID,
-		Brand:      a.Brand,
-		Model:      a.Model,
+		Brand:      a.GetBrand(),
+		Model:      a.GetModel(),
 		Category:   a.Category.grpc(),
 		Title:      a.Title,
 		IsVerified: a.IsVerified,
