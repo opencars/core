@@ -80,6 +80,9 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 
 		v.AppendOperations(operations...)
 		v.AppendRegistrations(registrations...)
+
+		v.AddOpAction(operations...)
+		v.AddRegAction(registrations...)
 	}
 
 	logger.Debugf("map all vins")
@@ -226,6 +229,7 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 		}
 
 		vehicles[hash].AppendRegistrations(r)
+		vehicles[hash].AddRegAction(r)
 	}
 
 	for _, op := range operations {
@@ -238,6 +242,7 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 		}
 
 		vehicles[hash].AppendOperations(op)
+		vehicles[hash].AddOpAction(op)
 	}
 
 	return vehicles, nil
