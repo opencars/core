@@ -23,10 +23,12 @@ type Vehicle struct {
 
 	registrationExist map[[sha1.Size]byte]struct{}
 	operationExist    map[[sha1.Size]byte]struct{}
+	actionExist       map[[sha1.Size]byte]*Action
 
 	registrations  []*registration.Record
 	operations     []*operation.Record
 	advertisements []Advertisement
+	actions        []*Action
 }
 
 func NewVehicle(vin, brand, model string, year int32) Vehicle {
@@ -43,9 +45,11 @@ func NewVehicle(vin, brand, model string, year int32) Vehicle {
 
 		registrationExist: make(map[[sha1.Size]byte]struct{}),
 		operationExist:    make(map[[sha1.Size]byte]struct{}),
+		actionExist:       make(map[[sha1.Size]byte]*Action),
 
 		registrations: make([]*registration.Record, 0),
 		operations:    make([]*operation.Record, 0),
+		actions:       make([]*Action, 0),
 	}
 }
 
@@ -175,6 +179,53 @@ func (v *Vehicle) AppendRegistrations(candidates ...*registration.Record) {
 	}
 }
 
+func (v *Vehicle) AddRegAction(candidates ...*registration.Record) {
+	for _, candidate := range candidates {
+		date := fmt.Sprintf("%d-%d-%d", candidate.Date.Day, candidate.Date.Month, candidate.Date.Year)
+		s := fmt.Sprintf("%d-%d-%s", candidate.Capacity, candidate.Year, date)
+		sha1 := sha1.Sum([]byte(s))
+
+		if action, ok := v.actionExist[sha1]; ok {
+			action.MergeRegistration(candidate)
+		} else {
+			// Add new.
+			// TODO: Insert in sorted way and save insert id.
+			newAction := NewActionFromRegistration(candidate)
+			v.actions = append(v.actions, newAction)
+			v.actionExist[sha1] = newAction
+			continue
+		}
+
+		// Try to assign vin code if it is not already assinged.
+		if candidate.Vin != "" && !v.HasVIN() {
+			candidate.Vin = v.VIN.Value
+		}
+	}
+}
+
+func (v *Vehicle) AddOpAction(candidates ...*operation.Record) {
+	for _, candidate := range candidates {
+		date := fmt.Sprintf("%d-%d-%d", candidate.Date.Day, candidate.Date.Month, candidate.Date.Year)
+		s := fmt.Sprintf("%d-%d-%s", candidate.Capacity, candidate.Year, date)
+		sha1 := sha1.Sum([]byte(s))
+
+		if action, ok := v.actionExist[sha1]; ok {
+			action.MergeOperation(candidate)
+		} else {
+			// Add new.
+			// TODO: Insert in sorted way and save insert id.
+			newAction := NewActionFromOperation(candidate)
+			v.actions = append(v.actions, newAction)
+			v.actionExist[sha1] = newAction
+		}
+
+		// Try to assign vin code if it is not already assinged.
+		if candidate.Vin != "" && !v.HasVIN() {
+			candidate.Vin = v.VIN.Value
+		}
+	}
+}
+
 func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
 	v.advertisements = append(v.advertisements, candidates...)
 }
@@ -202,6 +253,7 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 	dto.Registrations = v.registrations
 	dto.Operations = v.operations
 	dto.Advertisements = make([]*core.Advertisement, 0)
+	dto.Actions = make([]*core.Action, 0)
 
 	for _, add := range v.advertisements {
 		dto.Advertisements = append(dto.Advertisements, add.toGRPC())
@@ -209,6 +261,11 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 	}
 
 	logger.Infof("adds: %+v", dto.Advertisements)
+
+	for _, action := range v.actions {
+		dto.Actions = append(dto.Actions, action.toGRPC())
+		logger.Infof("add: %+v", action.toGRPC())
+	}
 
 	return &dto
 }
