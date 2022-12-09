@@ -27,12 +27,12 @@ type Action struct {
 	Color       string
 	Fuel        string
 	Kind        string
+	Body        string
 	Date        *common.Date
 	OwnWeight   int32
 	TotalWeight int32
 
 	// Operation:
-	Body       *string
 	Purpose    *string
 	Action     *operation.RecordAction
 	Department *operation.Department
@@ -57,12 +57,12 @@ func NewActionFromOperation(dto *operation.Record) *Action {
 		Color:       dto.Color,
 		Fuel:        dto.Fuel,
 		Kind:        dto.Kind,
+		Body:        dto.Body,
 		Date:        dto.Date,
 		OwnWeight:   dto.OwnWeight,
 		TotalWeight: dto.TotalWeight,
 
 		// Specific:
-		Body:       &dto.Body,
 		Purpose:    &dto.Purpose,
 		Action:     dto.Action,
 		Department: dto.Department,
@@ -82,6 +82,7 @@ func NewActionFromRegistration(dto *registration.Record) *Action {
 		Color:       dto.Color,
 		Fuel:        dto.Fuel,
 		Kind:        dto.Kind,
+		Body:        dto.Body,
 		Date:        dto.Date,
 		OwnWeight:   dto.OwnWeight,
 		TotalWeight: dto.TotalWeight,
@@ -99,11 +100,15 @@ func (a *Action) MergeOperation(dto *operation.Record) {
 		return
 	}
 
+	// VIN-code from operations has higher priority.
 	if dto.Vin != "" {
 		a.Vin = dto.Vin
 	}
 
-	a.Body = &dto.Body
+	if a.Body == "" && dto.Body != "" {
+		a.Body = dto.Body
+	}
+
 	a.Purpose = &dto.Purpose
 	a.Action = dto.Action
 	a.Department = dto.Department
@@ -117,6 +122,10 @@ func (a *Action) MergeRegistration(dto *registration.Record) {
 
 	if a.Vin == "" && dto.Vin != "" {
 		a.Vin = dto.Vin
+	}
+
+	if a.Body == "" && dto.Body != "" {
+		a.Body = dto.Body
 	}
 
 	a.Code = &dto.Code
@@ -136,21 +145,14 @@ func (a *Action) toGRPC() *core.Action {
 		Color:       a.Color,
 		Fuel:        a.Fuel,
 		Kind:        a.Kind,
+		Body:        a.Body,
 		Date:        a.Date,
 		OwnWeight:   a.OwnWeight,
 		TotalWeight: a.TotalWeight,
 	}
 
-	if a.Body != nil {
-		dto.Body = *a.Body
-	}
-
 	if a.Purpose != nil {
 		dto.Purpose = *a.Purpose
-	}
-
-	if a.Body != nil {
-		dto.Body = *a.Body
 	}
 
 	if a.Action != nil {

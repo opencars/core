@@ -3,7 +3,7 @@ module github.com/opencars/core
 go 1.19
 
 require (
-	github.com/opencars/grpc v0.5.8
+	github.com/opencars/grpc v0.5.9
 	github.com/opencars/seedwork v0.0.2
 	github.com/opencars/translit v0.1.2
 	google.golang.org/grpc v1.42.0
