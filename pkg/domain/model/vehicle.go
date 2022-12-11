@@ -191,7 +191,7 @@ func (v *Vehicle) AddRegAction(candidates ...*registration.Record) {
 		} else {
 			// Add new.
 			newAction := NewActionFromRegistration(candidate)
-			v.addAction(newAction)
+			v.AddAction(newAction)
 			v.actionExist[sha1] = newAction
 			continue
 		}
@@ -214,7 +214,7 @@ func (v *Vehicle) AddOpAction(candidates ...*operation.Record) {
 		} else {
 			// Add new.
 			newAction := NewActionFromOperation(candidate)
-			v.addAction(newAction)
+			v.AddAction(newAction)
 			v.actionExist[sha1] = newAction
 			continue
 		}
@@ -230,9 +230,9 @@ func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
 	v.advertisements = append(v.advertisements, candidates...)
 }
 
-func (v *Vehicle) addAction(action *Action) {
+func (v *Vehicle) AddAction(action *Action) {
 	i := sort.Search(len(v.actions), func(i int) bool {
-		return dateAfterThan(v.actions[i].Date, action.Date)
+		return !dateAfterThan(v.actions[i].Date, action.Date)
 	})
 
 	v.actions = insertAt(v.actions, i, action)
