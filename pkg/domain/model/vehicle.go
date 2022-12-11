@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/opencars/grpc/pkg/common"
@@ -189,9 +190,8 @@ func (v *Vehicle) AddRegAction(candidates ...*registration.Record) {
 			action.MergeRegistration(candidate)
 		} else {
 			// Add new.
-			// TODO: Insert in sorted way and save insert id.
 			newAction := NewActionFromRegistration(candidate)
-			v.actions = append(v.actions, newAction)
+			v.addAction(newAction)
 			v.actionExist[sha1] = newAction
 			continue
 		}
@@ -213,10 +213,10 @@ func (v *Vehicle) AddOpAction(candidates ...*operation.Record) {
 			action.MergeOperation(candidate)
 		} else {
 			// Add new.
-			// TODO: Insert in sorted way and save insert id.
 			newAction := NewActionFromOperation(candidate)
-			v.actions = append(v.actions, newAction)
+			v.addAction(newAction)
 			v.actionExist[sha1] = newAction
+			continue
 		}
 
 		// Try to assign vin code if it is not already assinged.
@@ -228,6 +228,34 @@ func (v *Vehicle) AddOpAction(candidates ...*operation.Record) {
 
 func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
 	v.advertisements = append(v.advertisements, candidates...)
+}
+
+func (v *Vehicle) addAction(action *Action) {
+	i := sort.Search(len(v.actions), func(i int) bool {
+		return dateAfterThan(v.actions[i].Date, action.Date)
+	})
+
+	v.actions = insertAt(v.actions, i, action)
+}
+
+// insertAt inserts v into s at index i and returns the new slice.
+func insertAt(data []*Action, i int, v *Action) []*Action {
+	if i == len(data) {
+		// Insert at end is the easy case.
+		return append(data, v)
+	}
+
+	// Make space for the inserted element by shifting
+	// values at the insertion index up one index. The call
+	// to append does not allocate memory when cap(data) is
+	// greater ​than len(data).
+	data = append(data[:i+1], data[i:]...)
+
+	// Insert the new element.
+	data[i] = v
+
+	// Return the updated slice.
+	return data
 }
 
 func (v *Vehicle) GetOperations() []*operation.Record {
