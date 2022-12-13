@@ -227,7 +227,15 @@ func (v *Vehicle) AddOpAction(candidates ...*operation.Record) {
 }
 
 func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
-	v.advertisements = append(v.advertisements, candidates...)
+	for _, add := range candidates {
+		v.advertisements = append(v.advertisements, candidates...)
+
+		i := sort.Search(len(v.advertisements), func(i int) bool {
+			return v.advertisements[i].PublishedAt < add.PublishedAt
+		})
+
+		v.advertisements = insertAt(v.advertisements, i, add)
+	}
 }
 
 func (v *Vehicle) AddAction(action *Action) {
@@ -239,7 +247,7 @@ func (v *Vehicle) AddAction(action *Action) {
 }
 
 // insertAt inserts v into s at index i and returns the new slice.
-func insertAt(data []*Action, i int, v *Action) []*Action {
+func insertAt[T any](data []T, i int, v T) []T {
 	if i == len(data) {
 		// Insert at end is the easy case.
 		return append(data, v)
