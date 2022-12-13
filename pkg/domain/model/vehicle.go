@@ -228,8 +228,6 @@ func (v *Vehicle) AddOpAction(candidates ...*operation.Record) {
 
 func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
 	for _, add := range candidates {
-		v.advertisements = append(v.advertisements, candidates...)
-
 		i := sort.Search(len(v.advertisements), func(i int) bool {
 			return v.advertisements[i].PublishedAt < add.PublishedAt
 		})
