@@ -304,8 +304,8 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 	return &dto
 }
 
-func (v *Vehicle) ToExternalGRPC() *core.ExternalResult_Vehicle {
-	dto := core.ExternalResult_Vehicle{
+func (v *Vehicle) ToExternalGRPC() *core.ResultForCustomer_Vehicle {
+	dto := core.ResultForCustomer_Vehicle{
 		Vin:   v.VIN.Value,
 		Brand: v.Brand,
 		Model: v.Model,

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	validation "github.com/go-ozzo/ozzo-validation"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/opencars/schema"
 	"github.com/opencars/schema/vehicle"
 	"github.com/opencars/seedwork"
