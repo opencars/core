@@ -55,13 +55,13 @@ func (a *Aggregate) ToGRPC() *core.Result {
 	}
 }
 
-func (a *Aggregate) ToExternalGRPC() *core.ExternalResult {
-	vehicles := make([]*core.ExternalResult_Vehicle, 0, len(a.Vehicles))
+func (a *Aggregate) ToExternalGRPC() *core.ResultForCustomer {
+	vehicles := make([]*core.ResultForCustomer_Vehicle, 0, len(a.Vehicles))
 	for _, v := range a.Vehicles {
 		vehicles = append(vehicles, v.ToExternalGRPC())
 	}
 
-	return &core.ExternalResult{
+	return &core.ResultForCustomer{
 		Vehicles: vehicles,
 	}
 }

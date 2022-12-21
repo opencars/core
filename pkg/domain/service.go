@@ -25,7 +25,7 @@ type CoreService interface {
 	FindByVIN(ctx context.Context, vin string) (*model.Aggregate, error)
 }
 
-type ExternalService interface {
+type CustomerService interface {
 	FindByNumber(ctx context.Context, number string) (*model.Aggregate, error)
 	FindByVIN(ctx context.Context, vin string) (*model.Aggregate, error)
 }
