@@ -12,7 +12,6 @@ type actionSource string
 const (
 	actionSourceOperation    actionSource = "Operation"
 	actionSourceRegistration actionSource = "Registration"
-	actionSourceMerged       actionSource = "Merged"
 )
 
 type Action struct {
@@ -28,7 +27,7 @@ type Action struct {
 	Fuel        string
 	Kind        string
 	Body        string
-	Date        *common.Date
+	Date        *Date
 	OwnWeight   int32
 	TotalWeight int32
 
@@ -58,7 +57,7 @@ func NewActionFromOperation(dto *operation.Record) *Action {
 		Fuel:        dto.Fuel,
 		Kind:        dto.Kind,
 		Body:        dto.Body,
-		Date:        dto.Date,
+		Date:        NewDateFromProto(dto.Date),
 		OwnWeight:   dto.OwnWeight,
 		TotalWeight: dto.TotalWeight,
 
@@ -83,7 +82,7 @@ func NewActionFromRegistration(dto *registration.Record) *Action {
 		Fuel:        dto.Fuel,
 		Kind:        dto.Kind,
 		Body:        dto.Body,
-		Date:        dto.Date,
+		Date:        NewDateFromProto(dto.Date),
 		OwnWeight:   dto.OwnWeight,
 		TotalWeight: dto.TotalWeight,
 
@@ -146,7 +145,7 @@ func (a *Action) toGRPC() *core.Action {
 		Fuel:        a.Fuel,
 		Kind:        a.Kind,
 		Body:        a.Body,
-		Date:        a.Date,
+		Date:        a.Date.ToProto(),
 		OwnWeight:   a.OwnWeight,
 		TotalWeight: a.TotalWeight,
 	}

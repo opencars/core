@@ -238,7 +238,7 @@ func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
 
 func (v *Vehicle) AddAction(action *Action) {
 	i := sort.Search(len(v.actions), func(i int) bool {
-		return !dateAfterThan(v.actions[i].Date, action.Date)
+		return v.actions[i].Date.After(action.Date)
 	})
 
 	v.actions = insertAt(v.actions, i, action)
@@ -295,6 +295,32 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 	}
 
 	logger.Infof("adds: %+v", dto.Advertisements)
+
+	for _, action := range v.actions {
+		dto.Actions = append(dto.Actions, action.toGRPC())
+		logger.Infof("add: %+v", action.toGRPC())
+	}
+
+	return &dto
+}
+
+func (v *Vehicle) ToExternalGRPC() *core.ExternalResult_Vehicle {
+	dto := core.ExternalResult_Vehicle{
+		Vin:   v.VIN.Value,
+		Brand: v.Brand,
+		Model: v.Model,
+		Year:  v.Year,
+	}
+
+	if v.FirstRegDate != nil {
+		dto.FirstRegDate = &common.Date{
+			Year:  int32(v.FirstRegDate.Year()),
+			Month: int32(v.FirstRegDate.Month()),
+			Day:   int32(v.FirstRegDate.Day()),
+		}
+	}
+
+	dto.Actions = make([]*core.Action, 0)
 
 	for _, action := range v.actions {
 		dto.Actions = append(dto.Actions, action.toGRPC())
