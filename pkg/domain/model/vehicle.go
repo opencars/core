@@ -238,7 +238,7 @@ func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
 
 func (v *Vehicle) AddAction(action *Action) {
 	i := sort.Search(len(v.actions), func(i int) bool {
-		return v.actions[i].Date.After(action.Date)
+		return !v.actions[i].Date.After(action.Date)
 	})
 
 	v.actions = insertAt(v.actions, i, action)
