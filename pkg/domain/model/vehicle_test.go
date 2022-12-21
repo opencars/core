@@ -3,7 +3,6 @@ package model
 import (
 	"testing"
 
-	"github.com/opencars/grpc/pkg/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +20,7 @@ func TestVehicle_AddAction(t *testing.T) {
 				Fuel:     "Бензин",
 				Kind:     "Легковий",
 				Body:     "Седан",
-				Date: &common.Date{
+				Date: &Date{
 					Day:   17,
 					Month: 03,
 					Year:  2021,
@@ -40,7 +39,7 @@ func TestVehicle_AddAction(t *testing.T) {
 				Fuel:     "Бензин",
 				Kind:     "Легковий",
 				Body:     "Седан",
-				Date: &common.Date{
+				Date: &Date{
 					Day:   15,
 					Month: 03,
 					Year:  2020,
@@ -62,7 +61,7 @@ func TestVehicle_AddAction(t *testing.T) {
 		Fuel:     "Бензин",
 		Kind:     "Легковий",
 		Body:     "Седан",
-		Date: &common.Date{
+		Date: &Date{
 			Day:   01,
 			Month: 01,
 			Year:  2022,
@@ -85,7 +84,7 @@ func TestVehicle_AddAction(t *testing.T) {
 			Fuel:     "Бензин",
 			Kind:     "Легковий",
 			Body:     "Седан",
-			Date: &common.Date{
+			Date: &Date{
 				Day:   01,
 				Month: 01,
 				Year:  2022,
@@ -104,7 +103,7 @@ func TestVehicle_AddAction(t *testing.T) {
 			Fuel:     "Бензин",
 			Kind:     "Легковий",
 			Body:     "Седан",
-			Date: &common.Date{
+			Date: &Date{
 				Day:   17,
 				Month: 03,
 				Year:  2021,
@@ -123,7 +122,7 @@ func TestVehicle_AddAction(t *testing.T) {
 			Fuel:     "Бензин",
 			Kind:     "Легковий",
 			Body:     "Седан",
-			Date: &common.Date{
+			Date: &Date{
 				Day:   15,
 				Month: 03,
 				Year:  2020,

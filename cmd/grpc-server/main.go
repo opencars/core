@@ -10,9 +10,11 @@ import (
 	"github.com/opencars/core/pkg/api/grpc"
 	"github.com/opencars/core/pkg/domain/adverts"
 	"github.com/opencars/core/pkg/domain/core"
+	"github.com/opencars/core/pkg/domain/external"
 	"github.com/opencars/core/pkg/domain/operation"
 	"github.com/opencars/core/pkg/domain/registration"
 	"github.com/opencars/core/pkg/domain/vin_decoding"
+	"github.com/opencars/schema/client"
 
 	"github.com/opencars/core/pkg/config"
 	"github.com/opencars/seedwork/logger"
@@ -56,8 +58,23 @@ func main() {
 		logger.Fatalf("core service: %s", err)
 	}
 
+	c, err := client.New(conf.NATS.Address())
+	if err != nil {
+		logger.Fatalf("nats: %v", err)
+	}
+
+	producer, err := c.Producer()
+	if err != nil {
+		logger.Fatalf("producer: %v", err)
+	}
+
+	externalSvc, err := external.NewService(r, o, producer)
+	if err != nil {
+		logger.Fatalf("core service: %s", err)
+	}
+
 	addr := ":" + strconv.Itoa(*port)
-	api := grpc.New(addr, svc)
+	api := grpc.New(addr, svc, externalSvc)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

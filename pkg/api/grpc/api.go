@@ -14,10 +14,12 @@ import (
 type API struct {
 	addr string
 	s    *grpc.Server
-	svc  domain.CoreService
+
+	vehicleHandler         *vehicleHandler
+	externalVehicleHandler *externalVehicleHandler
 }
 
-func New(addr string, svc domain.CoreService) *API {
+func New(addr string, svc domain.CoreService, external domain.ExternalService) *API {
 	opts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
 			RequestLoggingInterceptor,
@@ -25,9 +27,10 @@ func New(addr string, svc domain.CoreService) *API {
 	}
 
 	return &API{
-		addr: addr,
-		svc:  svc,
-		s:    grpc.NewServer(opts...),
+		addr:                   addr,
+		s:                      grpc.NewServer(opts...),
+		vehicleHandler:         newVehicleHandler(svc),
+		externalVehicleHandler: newExternalVehicleHandler(external),
 	}
 }
 
@@ -38,7 +41,8 @@ func (a *API) Run(ctx context.Context) error {
 	}
 	defer listener.Close()
 
-	core.RegisterVehicleServiceServer(a.s, &vehicleHandler{api: a})
+	core.RegisterVehicleServiceServer(a.s, a.vehicleHandler)
+	core.RegisterExternalVehicleServiceServer(a.s, a.externalVehicleHandler)
 
 	errors := make(chan error)
 	go func() {
