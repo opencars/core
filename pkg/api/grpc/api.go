@@ -23,6 +23,7 @@ func New(addr string, svc domain.CoreService, external domain.CustomerService) *
 	opts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
 			RequestLoggingInterceptor,
+			AuthInterceptor,
 		),
 	}
 
