@@ -4,13 +4,13 @@ go 1.19
 
 require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
-	github.com/opencars/grpc v0.5.9
-	github.com/opencars/schema v0.0.12
+	github.com/opencars/grpc v0.5.10
+	github.com/opencars/schema v0.0.13
 	github.com/opencars/seedwork v0.0.2
 	github.com/opencars/translit v0.1.2
 	github.com/stretchr/testify v1.8.1
 	google.golang.org/grpc v1.42.0
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
