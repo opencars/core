@@ -6,6 +6,7 @@ import (
 
 	"github.com/opencars/grpc/pkg/core"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	"github.com/opencars/core/pkg/domain"
 )
@@ -44,6 +45,7 @@ func (a *API) Run(ctx context.Context) error {
 
 	core.RegisterVehicleServiceServer(a.s, a.vehicleHandler)
 	core.RegisterCustomerServiceServer(a.s, a.customerHandler)
+	reflection.Register(a.s)
 
 	errors := make(chan error)
 	go func() {
