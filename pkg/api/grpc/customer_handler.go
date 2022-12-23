@@ -28,7 +28,7 @@ func (h *customerHandler) FindByNumber(ctx context.Context, r *core.NumberReques
 
 	result, err := h.svc.FindByNumber(ctx, &q)
 	if err != nil {
-		return nil, err
+		return nil, handleErr(err)
 	}
 
 	return result.ToExternalGRPC(), nil
@@ -43,7 +43,7 @@ func (h *customerHandler) FindByVIN(ctx context.Context, r *core.VINRequestByCus
 
 	result, err := h.svc.FindByVIN(ctx, &q)
 	if err != nil {
-		return nil, err
+		return nil, handleErr(err)
 	}
 
 	return result.ToExternalGRPC(), nil

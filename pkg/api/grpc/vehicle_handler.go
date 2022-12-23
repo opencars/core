@@ -21,7 +21,7 @@ func newVehicleHandler(svc domain.CoreService) *vehicleHandler {
 func (h *vehicleHandler) FindByNumber(ctx context.Context, r *core.NumberRequest) (*core.Result, error) {
 	result, err := h.svc.FindByNumber(ctx, r.Number)
 	if err != nil {
-		return nil, err
+		return nil, handleErr(err)
 	}
 
 	return result.ToGRPC(), nil
@@ -30,7 +30,7 @@ func (h *vehicleHandler) FindByNumber(ctx context.Context, r *core.NumberRequest
 func (h *vehicleHandler) FindByVIN(ctx context.Context, r *core.VINRequest) (*core.Result, error) {
 	result, err := h.svc.FindByVIN(ctx, r.Vin)
 	if err != nil {
-		return nil, err
+		return nil, handleErr(err)
 	}
 
 	return result.ToGRPC(), nil
