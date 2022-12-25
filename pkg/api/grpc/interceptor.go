@@ -30,7 +30,7 @@ func RequestLoggingInterceptor(ctx context.Context, req interface{}, info *grpc.
 }
 
 func AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	if !strings.Contains(info.FullMethod, "/core.CustomerService") {
+	if !strings.Contains(info.FullMethod, "/core.customer.VehicleService") {
 		return handler(ctx, req)
 	}
 
