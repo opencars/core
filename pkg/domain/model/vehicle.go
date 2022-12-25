@@ -9,6 +9,7 @@ import (
 
 	"github.com/opencars/grpc/pkg/common"
 	"github.com/opencars/grpc/pkg/core"
+	"github.com/opencars/grpc/pkg/core/customer"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
 	"github.com/opencars/seedwork/logger"
@@ -304,24 +305,15 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 	return &dto
 }
 
-func (v *Vehicle) ToExternalGRPC() *core.ResultForCustomer_Vehicle {
-	dto := core.ResultForCustomer_Vehicle{
+func (v *Vehicle) ToCustomerGRPC() *customer.Vehicle {
+	dto := customer.Vehicle{
 		Vin:   v.VIN.Value,
 		Brand: v.Brand,
 		Model: v.Model,
 		Year:  v.Year,
 	}
 
-	if v.FirstRegDate != nil {
-		dto.FirstRegDate = &common.Date{
-			Year:  int32(v.FirstRegDate.Year()),
-			Month: int32(v.FirstRegDate.Month()),
-			Day:   int32(v.FirstRegDate.Day()),
-		}
-	}
-
 	dto.Actions = make([]*core.Action, 0)
-
 	for _, action := range v.actions {
 		dto.Actions = append(dto.Actions, action.toGRPC())
 		logger.Infof("add: %+v", action.toGRPC())

@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/opencars/grpc/pkg/core"
+	"github.com/opencars/grpc/pkg/core/customer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -44,7 +45,7 @@ func (a *API) Run(ctx context.Context) error {
 	defer listener.Close()
 
 	core.RegisterVehicleServiceServer(a.s, a.vehicleHandler)
-	core.RegisterCustomerServiceServer(a.s, a.customerHandler)
+	customer.RegisterVehicleServiceServer(a.s, a.customerHandler)
 	reflection.Register(a.s)
 
 	errors := make(chan error)

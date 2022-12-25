@@ -7,6 +7,7 @@ import (
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
 	"github.com/opencars/schema"
+	"github.com/opencars/seedwork"
 	"github.com/opencars/seedwork/logger"
 
 	"github.com/opencars/core/pkg/domain"
@@ -96,12 +97,10 @@ func (s *Service) FindByNumber(ctx context.Context, q *query.ListByNumber) (*mod
 	return result, nil
 }
 
-func (s *Service) FindByVIN(ctx context.Context, q *query.ListByVIN) (*model.Aggregate, error) {
+func (s *Service) FindByVIN(ctx context.Context, q *query.ListByVIN) (*model.Vehicle, error) {
 	if err := query.Process(q); err != nil {
 		return nil, err
 	}
-
-	logger.Debugf("find all registratiton with given vin")
 
 	// Find all registratiton with given vin.
 	registrations, err := s.r.FindByVIN(ctx, q.VIN)
@@ -109,15 +108,11 @@ func (s *Service) FindByVIN(ctx context.Context, q *query.ListByVIN) (*model.Agg
 		return nil, err
 	}
 
-	logger.Debugf("find all operations with given vin")
-
 	// Find all operations with given vin.
 	operations, err := s.o.FindByVIN(ctx, q.VIN)
 	if err != nil {
 		return nil, err
 	}
-
-	logger.Debugf("detect all unique vehicles from given operations and registrations.")
 
 	// Detect all unique vehicles from given operations and registrations.
 	vehicles, err := s.detectVehicles(ctx, operations, registrations)
@@ -131,7 +126,11 @@ func (s *Service) FindByVIN(ctx context.Context, q *query.ListByVIN) (*model.Agg
 		return nil, err
 	}
 
-	return result, nil
+	if len(result.Vehicles) != 0 {
+		return &result.Vehicles[0], nil
+	}
+
+	return nil, seedwork.NewError("vehicle.not_found")
 }
 
 func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (map[string]*model.Vehicle, error) {

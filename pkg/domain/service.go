@@ -28,7 +28,7 @@ type CoreService interface {
 
 type CustomerService interface {
 	FindByNumber(ctx context.Context, q *query.ListByNumber) (*model.Aggregate, error)
-	FindByVIN(ctx context.Context, q *query.ListByVIN) (*model.Aggregate, error)
+	FindByVIN(ctx context.Context, q *query.ListByVIN) (*model.Vehicle, error)
 }
 
 type VinDecoder interface {
