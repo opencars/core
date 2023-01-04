@@ -283,6 +283,9 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 	dto.Registrations = v.registrations
 	dto.Operations = v.operations
 	dto.Wanted = v.wanted
+
+	logger.Debugf("to grpc: wanted: %s", v.wanted)
+
 	dto.Advertisements = make([]*core.Advertisement, 0)
 	dto.Actions = make([]*core.Action, 0)
 

@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/opencars/grpc/pkg/wanted"
+	"github.com/opencars/seedwork/logger"
 )
 
 type Service struct {
@@ -34,6 +35,8 @@ func (s *Service) Find(ctx context.Context, vins, numbers []string) ([]*wanted.V
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Debugf("wanted resp: %+v", resp.Vehicles)
 
 	return resp.Vehicles, nil
 }

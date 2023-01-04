@@ -138,13 +138,16 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 		for _, item := range wanted {
 			for i, vehicle := range vehicles {
 				if !vehicle.HasVIN() {
+					logger.Debugf("wanted: vin nof found %s")
 					continue
 				}
 
 				vin := vehicle.VIN.Value
+				logger.Debugf("find: item with vin %s: %+v", item, vin)
 
 				// TODO: Add wanted entity and method HasVIN(...).
 				if item.BodyNumber == vin || item.ChassisNumber == vin || item.EngineNumber == vin {
+					logger.Debugf("VEHICLE FOUND. Append wanted to item: %+v", vehicles[i].VIN)
 					vehicles[i].AppendWanted(item)
 				}
 			}
@@ -231,13 +234,16 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*model.Aggregate, 
 		for _, item := range wanted {
 			for i, vehicle := range vehicles {
 				if !vehicle.HasVIN() {
+					logger.Debugf("wanted: vin nof found %s")
 					continue
 				}
 
 				vin := vehicle.VIN.Value
+				logger.Debugf("find: item with vin %s: %+v", item, vin)
 
 				// TODO: Add wanted entity and method HasVIN(...).
 				if item.BodyNumber == vin || item.ChassisNumber == vin || item.EngineNumber == vin {
+					logger.Debugf("VEHICLE FOUND. Append wanted to item: %+v", vehicles[i].VIN)
 					vehicles[i].AppendWanted(item)
 				}
 			}
