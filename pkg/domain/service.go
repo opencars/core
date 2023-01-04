@@ -8,6 +8,7 @@ import (
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
 	"github.com/opencars/grpc/pkg/vin_decoding"
+	"github.com/opencars/grpc/pkg/wanted"
 )
 
 type RegistrationProvider interface {
@@ -37,4 +38,8 @@ type VinDecoder interface {
 
 type AdvertisementService interface {
 	FindByVINs(context.Context, []string, []string) ([]model.Advertisement, error)
+}
+
+type WantedService interface {
+	Find(ctx context.Context, vins, numbers []string) ([]*wanted.Vehicle, error)
 }

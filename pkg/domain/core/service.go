@@ -15,14 +15,16 @@ import (
 type Service struct {
 	r  domain.RegistrationProvider
 	o  domain.OperationProvider
+	w  domain.WantedService
 	vd domain.VinDecoder
 	as domain.AdvertisementService
 }
 
-func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd domain.VinDecoder, as domain.AdvertisementService) (*Service, error) {
+func NewService(r domain.RegistrationProvider, o domain.OperationProvider, vd domain.VinDecoder, as domain.AdvertisementService, w domain.WantedService) (*Service, error) {
 	return &Service{
 		r:  r,
 		o:  o,
+		w:  w,
 		vd: vd,
 		as: as,
 	}, nil
@@ -128,6 +130,22 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 		}
 	}
 
+	// Find wanted vehicles.
+	wanted, err := s.w.Find(ctx, vins, []string{number})
+	if err != nil {
+		logger.Errorf("failed find wanted: %s", err)
+	} else {
+		for _, item := range wanted {
+			for i, vehicle := range vehicles {
+				vin := vehicle.VIN.Value
+				// TODO: Add wanted entity and method HasVIN(...).
+				if item.BodyNumber == vin || item.ChassisNumber == vin || item.EngineNumber == vin {
+					vehicles[i].AppendWanted(item)
+				}
+			}
+		}
+	}
+
 	return model.NewAggregateWithNumber(number, vehicles), nil
 }
 
@@ -195,6 +213,22 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*model.Aggregate, 
 				if v.VIN.GetValue() == vins[i] {
 					v.VIN.DecodedVin = vinResult.DecodedVin
 					v.VIN.Vehicle = vinResult.Vehicle
+				}
+			}
+		}
+	}
+
+	// Find wanted vehicles.
+	wanted, err := s.w.Find(ctx, vins, []string{})
+	if err != nil {
+		logger.Errorf("failed find wanted: %s", err)
+	} else {
+		for _, item := range wanted {
+			for i, vehicle := range vehicles {
+				vin := vehicle.VIN.Value
+				// TODO: Add wanted entity and method HasVIN(...).
+				if item.BodyNumber == vin || item.ChassisNumber == vin || item.EngineNumber == vin {
+					vehicles[i].AppendWanted(item)
 				}
 			}
 		}

@@ -12,6 +12,7 @@ import (
 	"github.com/opencars/grpc/pkg/core/customer"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
+	"github.com/opencars/grpc/pkg/wanted"
 	"github.com/opencars/seedwork/logger"
 	"github.com/opencars/translit"
 )
@@ -29,6 +30,7 @@ type Vehicle struct {
 
 	registrations  []*registration.Record
 	operations     []*operation.Record
+	wanted         []*wanted.Vehicle
 	advertisements []Advertisement
 	actions        []*Action
 }
@@ -51,7 +53,10 @@ func NewVehicle(vin, brand, model string, year int32) Vehicle {
 
 		registrations: make([]*registration.Record, 0),
 		operations:    make([]*operation.Record, 0),
-		actions:       make([]*Action, 0),
+		wanted:        make([]*wanted.Vehicle, 0),
+
+		advertisements: make([]Advertisement, 0),
+		actions:        make([]*Action, 0),
 	}
 }
 
@@ -237,32 +242,22 @@ func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
 	}
 }
 
+func (v *Vehicle) AppendWanted(candidates ...*wanted.Vehicle) {
+	for _, wanted := range candidates {
+		i := sort.Search(len(v.wanted), func(i int) bool {
+			return dateAfterThan(wanted.InsertDate, v.wanted[i].InsertDate)
+		})
+
+		v.wanted = insertAt(v.wanted, i, wanted)
+	}
+}
+
 func (v *Vehicle) AddAction(action *Action) {
 	i := sort.Search(len(v.actions), func(i int) bool {
 		return !v.actions[i].Date.After(action.Date)
 	})
 
 	v.actions = insertAt(v.actions, i, action)
-}
-
-// insertAt inserts v into s at index i and returns the new slice.
-func insertAt[T any](data []T, i int, v T) []T {
-	if i == len(data) {
-		// Insert at end is the easy case.
-		return append(data, v)
-	}
-
-	// Make space for the inserted element by shifting
-	// values at the insertion index up one index. The call
-	// to append does not allocate memory when cap(data) is
-	// greater ​than len(data).
-	data = append(data[:i+1], data[i:]...)
-
-	// Insert the new element.
-	data[i] = v
-
-	// Return the updated slice.
-	return data
 }
 
 func (v *Vehicle) GetOperations() []*operation.Record {
