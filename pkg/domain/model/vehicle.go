@@ -282,19 +282,16 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 
 	dto.Registrations = v.registrations
 	dto.Operations = v.operations
+	dto.Wanted = v.wanted
 	dto.Advertisements = make([]*core.Advertisement, 0)
 	dto.Actions = make([]*core.Action, 0)
 
 	for _, add := range v.advertisements {
 		dto.Advertisements = append(dto.Advertisements, add.toGRPC())
-		logger.Infof("add: %+v", add.toGRPC())
 	}
-
-	logger.Infof("adds: %+v", dto.Advertisements)
 
 	for _, action := range v.actions {
 		dto.Actions = append(dto.Actions, action.toGRPC())
-		logger.Infof("add: %+v", action.toGRPC())
 	}
 
 	return &dto
