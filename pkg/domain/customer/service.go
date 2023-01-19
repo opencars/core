@@ -7,7 +7,6 @@ import (
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
 	"github.com/opencars/schema"
-	"github.com/opencars/seedwork"
 	"github.com/opencars/seedwork/logger"
 
 	"github.com/opencars/core/pkg/domain"
@@ -130,7 +129,7 @@ func (s *Service) FindByVIN(ctx context.Context, q *query.ListByVIN) (*model.Veh
 		return &result.Vehicles[0], nil
 	}
 
-	return nil, seedwork.NewError("vehicle.not_found")
+	return &model.Vehicle{}, nil
 }
 
 func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (map[string]*model.Vehicle, error) {

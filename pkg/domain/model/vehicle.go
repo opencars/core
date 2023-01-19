@@ -302,10 +302,13 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 
 func (v *Vehicle) ToCustomerGRPC() *customer.Vehicle {
 	dto := customer.Vehicle{
-		Vin:   v.VIN.Value,
 		Brand: v.Brand,
 		Model: v.Model,
 		Year:  v.Year,
+	}
+
+	if v.VIN != nil && v.VIN.Value != "" {
+		dto.Vin = v.VIN.Value
 	}
 
 	dto.Actions = make([]*core.Action, 0)
