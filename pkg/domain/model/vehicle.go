@@ -301,6 +301,10 @@ func (v *Vehicle) ToGRPC() *core.Vehicle {
 }
 
 func (v *Vehicle) ToCustomerGRPC() *customer.Vehicle {
+	if v == nil {
+		return nil
+	}
+
 	dto := customer.Vehicle{
 		Brand: v.Brand,
 		Model: v.Model,

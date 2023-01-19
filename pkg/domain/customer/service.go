@@ -129,7 +129,7 @@ func (s *Service) FindByVIN(ctx context.Context, q *query.ListByVIN) (*model.Veh
 		return &result.Vehicles[0], nil
 	}
 
-	return &model.Vehicle{}, nil
+	return nil, nil
 }
 
 func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (map[string]*model.Vehicle, error) {
