@@ -5,6 +5,7 @@ import (
 	"github.com/opencars/grpc/pkg/core"
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
+	"github.com/opencars/grpc/pkg/wanted"
 )
 
 type actionSource string
@@ -12,6 +13,7 @@ type actionSource string
 const (
 	actionSourceOperation    actionSource = "Operation"
 	actionSourceRegistration actionSource = "Registration"
+	actionSourceWanted       actionSource = "Wanted"
 )
 
 type Action struct {
@@ -183,4 +185,16 @@ func (a *Action) toGRPC() *core.Action {
 	}
 
 	return &dto
+}
+
+func NewActionFromWanted(dto *wanted.Vehicle) *Action {
+	return &Action{
+		source: actionSourceWanted,
+		Number: dto.Number,
+		Vin:    dto.Vin,
+		Brand:  dto.Brand,
+		Model:  dto.Model,
+		Color:  dto.Color,
+		Kind:   dto.Kind,
+	}
 }

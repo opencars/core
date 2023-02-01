@@ -232,6 +232,18 @@ func (v *Vehicle) AddOpAction(candidates ...*operation.Record) {
 	}
 }
 
+func (v *Vehicle) AddWantedAction(candidates ...*wanted.Vehicle) {
+	for _, candidate := range candidates {
+		newAction := NewActionFromWanted(candidate)
+		v.AddAction(newAction)
+
+		// Try to assign vin code if it is not already assinged.
+		if candidate.Vin != "" && !v.HasVIN() {
+			candidate.Vin = v.VIN.Value
+		}
+	}
+}
+
 func (v *Vehicle) AppendAdvertisements(candidates ...Advertisement) {
 	for _, add := range candidates {
 		i := sort.Search(len(v.advertisements), func(i int) bool {

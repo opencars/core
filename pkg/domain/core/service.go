@@ -272,11 +272,15 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 			if item.Vin == vin {
 				logger.Debugf("VEHICLE FOUND. Append wanted to item: %+v", vehicles[i].VIN)
 				vehicles[i].AppendWanted(item)
+				vehicles[i].AppendOperations()
 			}
 		}
 
 		if len(vehicles) == 0 {
 			v := model.NewVehicle(item.Vin, item.Brand, item.Model, 0)
+			v.AppendWanted(item)
+			v.AddWantedAction(item)
+
 			vehicles[""] = &v
 		}
 	}
