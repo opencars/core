@@ -196,5 +196,6 @@ func NewActionFromWanted(dto *wanted.Vehicle) *Action {
 		Model:  dto.Model,
 		Color:  dto.Color,
 		Kind:   dto.Kind,
+		Date:   NewDateFromProto(dto.TheftDate),
 	}
 }
