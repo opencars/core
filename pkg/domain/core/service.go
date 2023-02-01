@@ -6,6 +6,7 @@ import (
 
 	"github.com/opencars/grpc/pkg/operation"
 	"github.com/opencars/grpc/pkg/registration"
+	"github.com/opencars/grpc/pkg/wanted"
 	"github.com/opencars/seedwork/logger"
 
 	"github.com/opencars/core/pkg/domain"
@@ -47,10 +48,15 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 		return nil, err
 	}
 
+	wanted, err := s.w.Find(ctx, []string{}, []string{number})
+	if err != nil {
+		logger.Errorf("failed find wanted: %s", err)
+	}
+
 	logger.Debugf("detect all unique vehicles from given operations and registrations.")
 
 	// Detect all unique vehicles from given operations and registrations.
-	vehicles, err := s.detectVehicles(ctx, operations, registrations)
+	vehicles, err := s.detectVehicles(ctx, operations, registrations, wanted)
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +65,7 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 
 	// For each unique vehicle we loop throught existing operations
 	// and try to find operations and registrations by vehicles vin.
+
 	for k, v := range vehicles {
 		if !v.HasVIN() {
 			logger.Debugf("vehicle %s does not have vin-code", k)
@@ -130,30 +137,6 @@ func (s *Service) FindByNumber(ctx context.Context, number string) (*model.Aggre
 		}
 	}
 
-	// Find wanted vehicles.
-	wanted, err := s.w.Find(ctx, vins, []string{number})
-	if err != nil {
-		logger.Errorf("failed find wanted: %s", err)
-	} else {
-		for _, item := range wanted {
-			for i, vehicle := range vehicles {
-				if !vehicle.HasVIN() {
-					logger.Debugf("wanted: vin nof found %s")
-					continue
-				}
-
-				vin := vehicle.VIN.Value
-				logger.Debugf("find: item with vin %s: %+v", item, vin)
-
-				// TODO: Add wanted entity and method HasVIN(...).
-				if item.BodyNumber == vin || item.ChassisNumber == vin || item.EngineNumber == vin {
-					logger.Debugf("VEHICLE FOUND. Append wanted to item: %+v", vehicles[i].VIN)
-					vehicles[i].AppendWanted(item)
-				}
-			}
-		}
-	}
-
 	return model.NewAggregateWithNumber(number, vehicles), nil
 }
 
@@ -174,10 +157,15 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*model.Aggregate, 
 		return nil, err
 	}
 
+	wanted, err := s.w.Find(ctx, []string{vin}, []string{})
+	if err != nil {
+		logger.Errorf("failed find wanted: %s", err)
+	}
+
 	logger.Debugf("detect all unique vehicles from given operations and registrations.")
 
 	// Detect all unique vehicles from given operations and registrations.
-	vehicles, err := s.detectVehicles(ctx, operations, registrations)
+	vehicles, err := s.detectVehicles(ctx, operations, registrations, wanted)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +241,7 @@ func (s *Service) FindByVIN(ctx context.Context, vin string) (*model.Aggregate, 
 	return model.NewAggregate(vehicles), nil
 }
 
-func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record) (map[string]*model.Vehicle, error) {
+func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Record, registrations []*registration.Record, wanted []*wanted.Vehicle) (map[string]*model.Vehicle, error) {
 	vehicles := make(map[string]*model.Vehicle)
 
 	for _, r := range registrations {
@@ -293,6 +281,28 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 
 		vehicles[hash].AppendOperations(op)
 		vehicles[hash].AddOpAction(op)
+	}
+
+	for _, item := range wanted {
+		for i, vehicle := range vehicles {
+			if !vehicle.HasVIN() {
+				logger.Debugf("wanted: vin nof found %s")
+				continue
+			}
+
+			vin := vehicle.VIN.Value
+			logger.Debugf("find: item with vin %s: %+v", item, vin)
+
+			if item.Vin == vin {
+				logger.Debugf("VEHICLE FOUND. Append wanted to item: %+v", vehicles[i].VIN)
+				vehicles[i].AppendWanted(item)
+			}
+		}
+
+		if len(vehicles) == 0 {
+			v := model.NewVehicle(item.Vin, item.Brand, item.Model, 0)
+			vehicles[""] = &v
+		}
 	}
 
 	return vehicles, nil
