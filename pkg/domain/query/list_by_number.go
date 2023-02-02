@@ -37,7 +37,7 @@ func (q *ListByNumber) Validate() error {
 		validation.Field(
 			&q.Number,
 			validation.Required.Error(seedwork.Required),
-			validation.Length(6, 18).Error(seedwork.Invalid),
+			validation.Length(2, 18).Error(seedwork.Invalid),
 		),
 	)
 }
