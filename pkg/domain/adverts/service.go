@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"time"
 
 	"github.com/opencars/seedwork/logger"
 
@@ -23,7 +22,6 @@ type Service struct {
 	c *http.Client
 }
 
-// TODO: Configure timeout and http client settings.
 func NewService(cfg *config.ServiceHTTP) (*Service, error) {
 	return &Service{
 		addr:   cfg.Address(),
@@ -31,11 +29,11 @@ func NewService(cfg *config.ServiceHTTP) (*Service, error) {
 		token:  cfg.Token,
 
 		c: &http.Client{
-			Timeout: time.Second,
+			Timeout: cfg.Timeout.Duration,
 			Transport: &http.Transport{
-				Dial: func(network, addr string) (net.Conn, error) {
-					return net.DialTimeout(network, addr, time.Second)
-				},
+				DialContext: (&net.Dialer{
+					Timeout: cfg.Timeout.Duration,
+				}).DialContext,
 			},
 		},
 	}, nil

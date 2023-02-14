@@ -54,14 +54,3 @@ func (a *Aggregate) ToGRPC() *core.Result {
 		Vehicles: vehicles,
 	}
 }
-
-// func (a *Aggregate) ToExternalGRPC() *customer.FindByNumberResponse {
-// 	vehicles := make([]*core.ResultForCustomer_Vehicle, 0, len(a.Vehicles))
-// 	for _, v := range a.Vehicles {
-// 		vehicles = append(vehicles, v.ToExternalGRPC())
-// 	}
-
-// 	return &core.ResultForCustomer{
-// 		Vehicles: vehicles,
-// 	}
-// }

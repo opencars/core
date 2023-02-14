@@ -80,9 +80,6 @@ func (s *Service) FindByNumber(ctx context.Context, q *query.ListByNumber) (*mod
 			return nil, err
 		}
 
-		v.AppendOperations(operations...)
-		v.AppendRegistrations(registrations...)
-
 		v.AddOpAction(operations...)
 		v.AddRegAction(registrations...)
 	}
@@ -157,7 +154,6 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 			vehicles[hash] = &v
 		}
 
-		vehicles[hash].AppendRegistrations(r)
 		vehicles[hash].AddRegAction(r)
 	}
 
@@ -170,7 +166,6 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 			vehicles[hash] = &v
 		}
 
-		vehicles[hash].AppendOperations(op)
 		vehicles[hash].AddOpAction(op)
 	}
 

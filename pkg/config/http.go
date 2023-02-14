@@ -7,10 +7,11 @@ type HTTP struct {
 }
 
 type ServiceHTTP struct {
-	Host   string `yaml:"host"`
-	Port   int    `yaml:"port"`
-	Secret string `yaml:"secret"`
-	Token  string `yaml:"token"`
+	Host    string   `yaml:"host"`
+	Port    int      `yaml:"port"`
+	Secret  string   `yaml:"secret"`
+	Token   string   `yaml:"token"`
+	Timeout Duration `yaml:"timeout"`
 }
 
 func (s *ServiceHTTP) Address() string {
