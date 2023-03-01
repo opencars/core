@@ -257,7 +257,7 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 
 	for _, item := range wanted {
 		for i, vehicle := range vehicles {
-			if !vehicle.HasVIN() {
+			if vehicle.HasVIN() {
 				vin := vehicle.VIN.Value
 				logger.Debugf("find: item with vin %s: %+v", item, vin)
 
