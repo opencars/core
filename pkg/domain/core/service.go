@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/opencars/grpc/pkg/operation"
@@ -257,17 +258,28 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 	for _, item := range wanted {
 		for i, vehicle := range vehicles {
 			if !vehicle.HasVIN() {
-				logger.Debugf("wanted: vin nof found %s")
+				vin := vehicle.VIN.Value
+				logger.Debugf("find: item with vin %s: %+v", item, vin)
+
+				if item.Vin == vin {
+					logger.Debugf("VEHICLE FOUND. Append wanted to item: %+v", vehicles[i].VIN)
+					vehicles[i].AppendWanted(item)
+				}
+
 				continue
 			}
 
-			vin := vehicle.VIN.Value
-			logger.Debugf("find: item with vin %s: %+v", item, vin)
+			titleHasBrand := strings.Contains(item.Title, vehicle.Brand)
+			titleHasModel := strings.Contains(item.Title, vehicle.Model)
 
-			if item.Vin == vin {
-				logger.Debugf("VEHICLE FOUND. Append wanted to item: %+v", vehicles[i].VIN)
+			if titleHasBrand && titleHasModel {
 				vehicles[i].AppendWanted(item)
+				logger.Debugf("find: item with brand=%s model=%s", item.Brand, item.Model)
+
+				continue
 			}
+
+			logger.Debugf("wanted: vin not found")
 		}
 
 		if len(vehicles) == 0 {
