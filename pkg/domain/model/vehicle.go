@@ -156,11 +156,6 @@ func (v *Vehicle) AppendWanted(candidates ...*wanted.Vehicle) {
 		})
 
 		v.wanted = insertAt(v.wanted, i, wanted)
-
-		// Try to assign vin code if it is not already assinged.
-		if wanted.Vin != "" && !v.HasVIN() {
-			wanted.Vin = v.VIN.Value
-		}
 	}
 }
 
@@ -228,6 +223,12 @@ func (v *Vehicle) ToCustomerGRPC() *customer.Vehicle {
 	}
 
 	return &dto
+}
+
+func (v *Vehicle) AssignVIN(vin string) {
+	v.VIN = &core.Vin{
+		Value: vin,
+	}
 }
 
 func GetVINs(vehicles map[string]*Vehicle) []string {

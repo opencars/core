@@ -274,6 +274,8 @@ func (s *Service) detectVehicles(ctx context.Context, operations []*operation.Re
 
 			if titleHasBrand && titleHasModel {
 				vehicles[i].AppendWanted(item)
+				vehicles[i].AssignVIN(item.Vin)
+
 				logger.Debugf("find: item with brand=%s model=%s", item.Brand, item.Model)
 
 				continue
