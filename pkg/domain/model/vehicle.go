@@ -156,6 +156,11 @@ func (v *Vehicle) AppendWanted(candidates ...*wanted.Vehicle) {
 		})
 
 		v.wanted = insertAt(v.wanted, i, wanted)
+
+		// Try to assign vin code if it is not already assinged.
+		if wanted.Vin != "" && !v.HasVIN() {
+			wanted.Vin = v.VIN.Value
+		}
 	}
 }
 
