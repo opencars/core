@@ -74,8 +74,8 @@ func (v *Vehicle) LastModificationWithNumber(number string) time.Time {
 }
 
 func (v *Vehicle) HasVIN() bool {
-	isValidVIN := len(v.VIN.Value) > 6 && len(v.VIN.Value) < 18
-	return v.VIN != nil && v.VIN.Value != "" && isValidVIN
+	return v.VIN != nil && v.VIN.Value != "" &&
+		len(v.VIN.Value) >= 6 && len(v.VIN.Value) <= 18
 }
 
 func (v *Vehicle) SetFirstRegDate(x time.Time) {
